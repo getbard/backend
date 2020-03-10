@@ -29,7 +29,9 @@ const resolvers = {
 };
 
 const server = new ApolloServer({ typeDefs, resolvers });
+console.log('cool');
 
-server.listen().then(({ url }) => {
+
+server.listen().then(({ url }: { url: string }) => {
   console.log(`🚀  Server ready at ${url}`);
 });

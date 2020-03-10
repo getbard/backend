@@ -4,8 +4,17 @@
   "repository": "https://github.com/getbard/backend",
   "author": "Anthony Morris <anthony@amorrissound.com>",
   "private": true,
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "start": "ts-node src/index.ts"
+  },
   "dependencies": {
     "apollo-server": "^2.11.0",
     "graphql": "^14.6.0"
+  },
+  "devDependencies": {
+    "ts-node": "^8.6.2",
+    "typescript": "^3.8.3"
   }
 }

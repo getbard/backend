@@ -1,0 +1,12 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "target": "es5",                          
+    "module": "commonjs",                     
+    "lib": ["dom","esnext"],                     
+    "outDir": "dist",                         
+    "rootDir": "src",                         
+    "removeComments": true,                   
+    "strict": true                     
+  }
+}
