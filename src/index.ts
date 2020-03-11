@@ -1,4 +1,4 @@
-const { ApolloServer, gql } = require('apollo-server');
+import { ApolloServer, gql } from 'apollo-server';
 
 const typeDefs = gql`
   type Article {
@@ -24,13 +24,11 @@ const articles = [
 
 const resolvers = {
   Query: {
-    articles: () => articles,
+    articles: (): Array<object> => articles,
   },
 };
 
 const server = new ApolloServer({ typeDefs, resolvers });
-console.log('cool');
-
 
 server.listen().then(({ url }: { url: string }) => {
   console.log(`🚀  Server ready at ${url}`);
