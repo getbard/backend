@@ -8,6 +8,7 @@
     "build": "tsc",
     "build:watch": "tsc -w",
     "start": "ts-node src/index.ts",
+    "start:production": "node dist/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
