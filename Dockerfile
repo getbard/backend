@@ -23,7 +23,7 @@ WORKDIR /usr/src/app
 COPY package.json yarn.lock ./
 RUN yarn --production
 
-COPY --from=builder dist ./dist
+COPY --from=builder /build/dist ./dist
 
 CMD [ "yarn", "start:production" ]
 
