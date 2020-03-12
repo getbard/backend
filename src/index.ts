@@ -1,35 +1,23 @@
+import './lib/env';
+
 import { ApolloServer, gql } from 'apollo-server';
+import { readFileSync } from 'fs';
+import db from './lib/db';
 
-const typeDefs = gql`
-  type Article {
-    title: String
-    author: String
-  }
+import { Context } from './types';
 
-  type Query {
-    articles: [Article]
-  }
-`;
+import resolvers from './resolvers';
 
-const articles = [
-  {
-    title: 'How to make a living with your writing',
-    author: 'Anthony Morris',
-  },
-  {
-    title: 'Finding Success After Bootcamp',
-    author: 'Anthony Morris',
-  },
-];
-
-const resolvers = {
-  Query: {
-    articles: (): Array<object> => articles,
-  },
-};
-
-const server = new ApolloServer({ typeDefs, resolvers });
-
-server.listen({ port: process.env.PORT || 4000 }).then(({ url }: { url: string }) => {
-  console.log(`🚀  Server ready at ${url}`);
+const server = new ApolloServer({
+  typeDefs: gql`${readFileSync(__dirname.concat('/schema.graphql'), 'utf8')}`,
+  resolvers,
+  context: (): Context => ({
+    db,
+  })
 });
+
+server
+  .listen({ port: process.env.PORT || 4000 })
+  .then(({ url }: { url: string }) => {
+    console.log(`🚀  Server ready at ${url}`);
+  });

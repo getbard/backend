@@ -1,0 +1,54 @@
+type Query {
+  articles: [Article]
+  article(id: ID): Article
+}
+
+type Mutation {
+  createArticle(input: CreateArticleInput!): CreateArticlePayload!
+}
+
+type Article {
+  id: ID!
+  title: String!
+  subtitle: String
+  content: String!
+  headerImageURL: String
+  author: User!
+  categories: [Category]
+  comments: [Comment]
+  likes: Int!
+  wordLength: Int!
+}
+
+type User {
+  id: ID!
+  name: String
+  username: String!
+  email: String!
+  profileImageURL: String
+  following: [User]
+  followers: [User]
+}
+
+type Category {
+  id: ID
+  name: String!
+}
+
+type Comment {
+  id: ID
+  user: User!
+  message: String!
+  replies: [Comment]
+}
+
+input CreateArticleInput {
+  title: String!
+  subtitle: String
+  content: String!
+  headerImageURL: String
+}
+
+type CreateArticlePayload {
+  id: ID!
+}
