@@ -1,6 +1,9 @@
 # dependencies
 node_modules
 
+# generated graphql
+generated
+
 # builds
 dist
 

@@ -1,3 +1,13 @@
+type Query {
+  articles: [Article]
+  article: Article!
+}
+
+type Mutation {
+  createArticle(input: CreateArticleInput!): CreateArticlePayload!
+}
+
+
 type Article {
   id: ID!
   title: String!
@@ -9,13 +19,6 @@ type Article {
   comments: [Comment]
   likes: Int!
   wordLength: Int!
-}
-
-input NewArticle {
-  title: String!
-  subtitle: String
-  content: String!
-  headerImageURL: String
 }
 
 type User {
@@ -40,11 +43,13 @@ type Comment {
   replies: [Comment]
 }
 
-type Query {
-  articles: [Article]
-  article: Article!
+input CreateArticleInput {
+  title: String!
+  subtitle: String
+  content: String!
+  headerImageURL: String
 }
 
-type Mutation {
-  createArticle(input: NewArticle!): Article!
+type CreateArticlePayload {
+  id: ID!
 }

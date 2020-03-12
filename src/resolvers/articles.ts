@@ -1,4 +1,5 @@
-import { Context, Article } from '../types';
+import { Article } from '../generated/graphql';
+import { Context } from '../types';
 
 const articles = async (
   _: null, 

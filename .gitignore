@@ -13,6 +13,9 @@ node_modules
 # production
 /dist
 
+# generated graphql
+generated
+
 # misc
 .DS_Store
 .env*
