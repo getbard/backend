@@ -1,12 +1,6 @@
-const articles = [
-  {
-    title: 'How to make a living with your writing',
-    author: 'Anthony Morris',
-  },
-  {
-    title: 'Finding Success After Bootcamp',
-    author: 'Anthony Morris',
-  },
-];
+import { Context, Article } from '../types';
 
-export default (): Array<object> => articles;
+export default async (_: null, args: null, context: Context): Promise<Article[]> => {
+  const articles = await context.db.collection('articles').get();
+  return articles.docs.map(article => article.data()) as Article[];
+};
