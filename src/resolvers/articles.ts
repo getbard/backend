@@ -22,11 +22,11 @@ const article = async (
 
 const createArticle = async (
   _: null,
-  { article }: { article: Article },
+  { input }: { input: Article },
   context: Context
 ): Promise<Article> => {
-  await context.db.collection('articles').doc('whatever').set(article);
-  const articleDoc = await context.db.doc('articles/whatever').get();
+  const articleRef = await context.db.collection('articles').add(input);
+  const articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
   return articleDoc.data() as Article;
 }
 
