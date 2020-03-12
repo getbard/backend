@@ -1,4 +1,4 @@
-import { Article } from '../generated/graphql';
+import { Article, CreateArticleInput, CreateArticlePayload } from '../generated/graphql';
 import { Context } from '../types';
 
 const articles = async (
@@ -23,12 +23,12 @@ const article = async (
 
 const createArticle = async (
   _: null,
-  { input }: { input: Article },
+  { input }: { input: CreateArticleInput },
   context: Context
-): Promise<Article> => {
+): Promise<CreateArticlePayload> => {
   const articleRef = await context.db.collection('articles').add(input);
   const articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
-  return articleDoc.data() as Article;
+  return articleDoc.data() as CreateArticlePayload;
 }
 
 export default {
