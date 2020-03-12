@@ -23,7 +23,7 @@ WORKDIR /usr/src/app
 COPY package.json yarn.lock ./
 RUN yarn --production
 
-COPY --from=builder /build/dist /src/schema.graphql ./
+COPY --from=builder /build/dist /build/src/schema.graphql ./
 
 CMD [ "yarn", "start:production" ]
 
