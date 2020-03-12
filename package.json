@@ -12,7 +12,7 @@
     "prestart": "yarn generate",
     "start": "ts-node src/index.ts",
     "start:watch": "tsnd --respawn src/index.ts",
-    "start:production": "node dist/index.js",
+    "start:production": "node index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "generate": "graphql-codegen --config codegen.yml"
   },
