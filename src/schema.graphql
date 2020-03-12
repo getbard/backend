@@ -1,12 +1,11 @@
 type Query {
   articles: [Article]
-  article: Article!
+  article(id: ID): Article
 }
 
 type Mutation {
   createArticle(input: CreateArticleInput!): CreateArticlePayload!
 }
-
 
 type Article {
   id: ID!

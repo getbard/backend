@@ -7,7 +7,7 @@ const articles = async (
   context: Context
 ): Promise<Article[]> => {
   const articles = await context.db.collection('articles').get();
-  return articles.docs.map(article => article.data()) as Article[];
+  return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
 };
 
 const article = async (
@@ -17,8 +17,7 @@ const article = async (
 ): Promise<Article | null> => {
   const articleDoc = await context.db.doc(`articles/${args.id}`).get();
   const article = articleDoc.data() as Article | undefined;
-
-  return article || null;
+  return article ? { id: articleDoc.id, ...article } : null;
 }
 
 const createArticle = async (
@@ -28,7 +27,7 @@ const createArticle = async (
 ): Promise<CreateArticlePayload> => {
   const articleRef = await context.db.collection('articles').add(input);
   const articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
-  return articleDoc.data() as CreateArticlePayload;
+  return { id: articleDoc.id, ...articleDoc.data() } as CreateArticlePayload;
 }
 
 export default {
