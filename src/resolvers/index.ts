@@ -1,7 +1,5 @@
+import merge from 'lodash.merge';
+
 import articles from './articles';
 
-export default {
-  Query: {
-    articles,
-  },
-};
+export default merge(articles);
