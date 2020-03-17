@@ -30,7 +30,7 @@ const createOrUpdateArticle = async (
     throw new AuthenticationError('Not authenticated');
   }
 
-  if (context.userId !== input.userId) {
+  if (input.userId && context.userId !== input.userId) {
     throw new AuthenticationError('Not authorized');
   }
 
@@ -44,7 +44,10 @@ const createOrUpdateArticle = async (
     await context.db.doc(`articles/${article.id}`).set(article, { merge: true });
     articleDoc = await context.db.doc(`articles/${article.id}`).get();
   } else {
+    // Default values for new articles
+    article.draft = true;
     article.createdAt = new Date().toISOString();
+
     const articleRef = await context.db.collection('articles').add(article);
     articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
   }
