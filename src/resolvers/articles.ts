@@ -1,4 +1,4 @@
-import { Article, CreateArticleInput, CreateArticlePayload } from '../generated/graphql';
+import { Article, CreateOrUpdateArticleInput, CreateOrUpdateArticlePayload } from '../generated/graphql';
 import { Context } from '../types';
 
 const articles = async (
@@ -20,14 +20,27 @@ const article = async (
   return article ? { id: articleDoc.id, ...article } : null;
 }
 
-const createArticle = async (
+const createOrUpdateArticle = async (
   _: null,
-  { input }: { input: CreateArticleInput },
+  { input }: { input: CreateOrUpdateArticleInput },
   context: Context
-): Promise<CreateArticlePayload> => {
-  const articleRef = await context.db.collection('articles').add(input);
-  const articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
-  return { id: articleDoc.id, ...articleDoc.data() } as CreateArticlePayload;
+): Promise<CreateOrUpdateArticlePayload> => {
+  const article: CreateOrUpdateArticleInput = {
+    ...input,
+    updated: new Date().toISOString(),
+  };
+  let articleDoc;
+
+  if (article.id) {
+    await context.db.doc(`articles/${article.id}`).set(article, { merge: true });
+    articleDoc = await context.db.doc(`articles/${article.id}`).get();
+  } else {
+    article.created = new Date().toISOString();
+    const articleRef = await context.db.collection('articles').add(article);
+    articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
+  }
+  
+  return { id: articleDoc.id, ...articleDoc.data() } as CreateOrUpdateArticlePayload;
 }
 
 export default {
@@ -36,6 +49,6 @@ export default {
     article,
   },
   Mutation: {
-    createArticle,
+    createOrUpdateArticle,
   }
 }
