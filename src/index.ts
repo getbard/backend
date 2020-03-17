@@ -14,7 +14,7 @@ import resolvers from './resolvers';
 
 firebase.initializeApp({
   credential: firebase.credential.cert(firebaseConfig),
-  databaseURL: "https://bard-stage.firebaseio.com"
+  databaseURL: process.env.FIREBASE_DB_URL,
 });
 
 const server = new ApolloServer({
