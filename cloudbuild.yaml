@@ -1,4 +1,13 @@
 steps:
+  # get the env file for the project
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: "bash"
+    args:
+        - "-c"
+        - |
+            gcloud components update
+            # Store the secret is a temporary file
+            gcloud beta secrets versions access --secret=backend-$PROJECT_ID-env latest > .env
   # get the firebase.json file for the project
   - name: gcr.io/cloud-builders/gcloud
     entrypoint: "bash"
@@ -7,7 +16,7 @@ steps:
         - |
             gcloud components update
             # Store the secret is a temporary file
-            gcloud beta secrets versions access --secret=webapp-$PROJECT_ID-firebase latest > firebase.json
+            gcloud beta secrets versions access --secret=backend-$PROJECT_ID-firebase latest > firebase.json
   # build the container image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/backend:$COMMIT_SHA', '.']

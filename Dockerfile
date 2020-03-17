@@ -21,7 +21,8 @@ WORKDIR /usr/src/app
 
 # Install dependencies
 COPY package.json yarn.lock ./
-COPY firebase.json ./firebase.json
+COPY firebase.json firebase.json
+COPY .env .env
 RUN yarn --production
 
 COPY --from=builder /build/dist /build/src/schema.graphql ./
