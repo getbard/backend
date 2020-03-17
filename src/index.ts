@@ -24,7 +24,11 @@ const server = new ApolloServer({
     const token = req.headers.authorization || '';
     let decodedToken;
     if (token) {
-      decodedToken = await firebase.auth().verifyIdToken(token.split(' ')[1]);
+      try {
+        decodedToken = await firebase.auth().verifyIdToken(token.split(' ')[1]);
+      } catch(error) {
+        console.log('Invalid token sent from client:', error);
+      }
     }
 
     return {
