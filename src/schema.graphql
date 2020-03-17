@@ -10,7 +10,7 @@ type Mutation {
 type Article {
   id: ID!
   title: String!
-  subtitle: String
+  summary: String
   content: String!
   headerImageURL: String
   author: User!
