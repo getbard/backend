@@ -19,8 +19,9 @@ type Article {
   likes: Int!
   wordLength: Int!
   draft: Boolean!
-  created: String!
-  updated: String!
+  createdAt: String!
+  updatedAt: String!
+  userId: String!
 }
 
 type User {
@@ -31,15 +32,15 @@ type User {
   profileImageURL: String
   following: [User]
   followers: [User]
-  created: String!
-  updated: String!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Category {
   id: ID
   name: String!
-  created: String!
-  updated: String!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Comment {
@@ -47,8 +48,8 @@ type Comment {
   user: User!
   message: String!
   replies: [Comment]
-  created: String!
-  updated: String!
+  createdAt: String!
+  updatedAt: String!
 }
 
 input CreateOrUpdateArticleInput {
@@ -57,8 +58,9 @@ input CreateOrUpdateArticleInput {
   summary: String
   content: String!
   headerImageURL: String
-  created: String
-  updated: String
+  createdAt: String
+  updatedAt: String
+  userId: String!
 }
 
 type CreateOrUpdateArticlePayload {

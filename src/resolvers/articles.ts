@@ -1,5 +1,6 @@
 import { Article, CreateOrUpdateArticleInput, CreateOrUpdateArticlePayload } from '../generated/graphql';
 import { Context } from '../types';
+import { AuthenticationError } from 'apollo-server';
 
 const articles = async (
   _: null, 
@@ -25,9 +26,17 @@ const createOrUpdateArticle = async (
   { input }: { input: CreateOrUpdateArticleInput },
   context: Context
 ): Promise<CreateOrUpdateArticlePayload> => {
+  if (!context.userId) {
+    throw new AuthenticationError('Not authenticated');
+  }
+
+  if (context.userId !== input.userId) {
+    throw new AuthenticationError('Not authorized');
+  }
+
   const article: CreateOrUpdateArticleInput = {
     ...input,
-    updated: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
   let articleDoc;
 
@@ -35,7 +44,7 @@ const createOrUpdateArticle = async (
     await context.db.doc(`articles/${article.id}`).set(article, { merge: true });
     articleDoc = await context.db.doc(`articles/${article.id}`).get();
   } else {
-    article.created = new Date().toISOString();
+    article.createdAt = new Date().toISOString();
     const articleRef = await context.db.collection('articles').add(article);
     articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
   }
