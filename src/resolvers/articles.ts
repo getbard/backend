@@ -8,7 +8,7 @@ const articles = async (
   context: Context
 ): Promise<Article[]> => {
   const articles = await context.db.collection('articles').where('draft', '==', false).get();
-  return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
+  return articles.docs.map(article => article.data()) as Article[];
 };
 
 const article = async (
@@ -47,10 +47,10 @@ const articlesByUser = async (
   if (context.userId === args.userId) {
     articles = await articlesRef.get();
   } else {
-    articles = await articlesRef.where('draft', '==', 'false').get();
+    articles = await articlesRef.where('draft', '==', false).get();
   }
 
-  return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
+  return articles.docs.map(article => article.data()) as Article[];
 };
 
 const createOrUpdateArticle = async (
