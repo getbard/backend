@@ -40,7 +40,7 @@ type User {
 }
 
 type Category {
-  id: ID
+  id: ID!
   name: String!
   createdAt: String!
   updatedAt: String!
