@@ -44,7 +44,7 @@ const articlesByUser = async (
   let articles;
 
   // Filter out drafts if the requesting user isn't the author
-  if (context?.userId === args.userId) {
+  if (context.userId === args.userId) {
     articles = await articlesRef.get();
   } else {
     articles = await articlesRef.where('draft', '==', 'false').get();
@@ -62,7 +62,7 @@ const createOrUpdateArticle = async (
     throw new AuthenticationError('Not authenticated');
   }
 
-  if (context?.userId !== input.userId) {
+  if (input.userId && context?.userId !== input.userId) {
     throw new AuthenticationError('Not authorized');
   }
 
