@@ -12,15 +12,15 @@
     "prestart": "yarn generate",
     "start": "ts-node src/index.ts",
     "start:watch": "tsnd --respawn src/index.ts",
-    "start:production": "node index.js",
+    "start:production": "node src/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "generate": "graphql-codegen --config codegen.yaml"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^3.6.0",
     "@graphql-codegen/typescript-resolvers": "^1.13.0",
     "apollo-server": "^2.11.0",
     "dotenv": "^8.2.0",
+    "firebase-admin": "^8.10.0",
     "graphql": "^14.6.0",
     "lodash.merge": "^4.6.2"
   },

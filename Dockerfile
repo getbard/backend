@@ -23,7 +23,10 @@ WORKDIR /usr/src/app
 COPY package.json yarn.lock ./
 RUN yarn --production
 
-COPY --from=builder /build/dist /build/src/schema.graphql ./
+COPY firebase.json firebase.json
+COPY .env .env
+
+COPY --from=builder /build/dist /build/src/schema.graphql ./src/
 
 CMD [ "yarn", "start:production" ]
 

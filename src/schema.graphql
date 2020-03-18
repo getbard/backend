@@ -4,13 +4,13 @@ type Query {
 }
 
 type Mutation {
-  createArticle(input: CreateArticleInput!): CreateArticlePayload!
+  createOrUpdateArticle(input: CreateOrUpdateArticleInput!): CreateOrUpdateArticlePayload!
 }
 
 type Article {
   id: ID!
   title: String!
-  subtitle: String
+  summary: String
   content: String!
   headerImageURL: String
   author: User!
@@ -18,6 +18,11 @@ type Article {
   comments: [Comment]
   likes: Int!
   wordLength: Int!
+  draft: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  userId: String!
+  subscribersOnly: Boolean!
 }
 
 type User {
@@ -28,11 +33,15 @@ type User {
   profileImageURL: String
   following: [User]
   followers: [User]
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Category {
   id: ID
   name: String!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Comment {
@@ -40,15 +49,23 @@ type Comment {
   user: User!
   message: String!
   replies: [Comment]
+  createdAt: String!
+  updatedAt: String!
 }
 
-input CreateArticleInput {
+input CreateOrUpdateArticleInput {
+  id:  ID
   title: String!
-  subtitle: String
+  summary: String
   content: String!
   headerImageURL: String
+  createdAt: String
+  updatedAt: String
+  userId: String
+  subscribersOnly: Boolean!
+  draft: Boolean
 }
 
-type CreateArticlePayload {
+type CreateOrUpdateArticlePayload {
   id: ID!
 }
