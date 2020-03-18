@@ -21,6 +21,20 @@ const article = async (
   return article ? { id: articleDoc.id, ...article } : null;
 }
 
+const articleBySlug = async (
+  _: null,
+  args: { slug: string },
+  context: Context
+): Promise<Article | null> => {
+  const articles = await context.db
+    .collection('articles')
+    .where('slug', '==', args.slug)
+    .get();
+
+  const article = articles.docs[0].data() as Article | undefined;
+  return article ? { id: articles.docs[0].id, ...article } : null;
+}
+
 const createOrUpdateArticle = async (
   _: null,
   { input }: { input: CreateOrUpdateArticleInput },
@@ -47,7 +61,6 @@ const createOrUpdateArticle = async (
     // Default values for new articles
     article.draft = true;
     article.createdAt = new Date().toISOString();
-
     const articleRef = await context.db.collection('articles').add(article);
     articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
   }
@@ -59,6 +72,7 @@ export default {
   Query: {
     articles,
     article,
+    articleBySlug,
   },
   Mutation: {
     createOrUpdateArticle,
