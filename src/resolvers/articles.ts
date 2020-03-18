@@ -35,16 +35,34 @@ const articleBySlug = async (
   return article ? { id: articles.docs[0].id, ...article } : null;
 }
 
+const articlesByUser = async (
+  _: null, 
+  args: { userID: string },
+  context: Context
+): Promise<Article[]> => {
+  const articlesRef = await context.db.collection('articles');
+  let articles;
+
+  // Filter out drafts if the requesting user isn't the author
+  if (context?.userID === args.userID) {
+    articles = await articlesRef.get();
+  } else {
+    articles = await articlesRef.where('draft', '==', 'false').get();
+  }
+
+  return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
+};
+
 const createOrUpdateArticle = async (
   _: null,
   { input }: { input: CreateOrUpdateArticleInput },
   context: Context
 ): Promise<CreateOrUpdateArticlePayload> => {
-  if (!context.userId) {
+  if (!context.userID) {
     throw new AuthenticationError('Not authenticated');
   }
 
-  if (input.userId && context.userId !== input.userId) {
+  if (context?.userID !== input.userID) {
     throw new AuthenticationError('Not authorized');
   }
 
@@ -73,6 +91,7 @@ export default {
     articles,
     article,
     articleBySlug,
+    articlesByUser,
   },
   Mutation: {
     createOrUpdateArticle,

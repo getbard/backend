@@ -33,7 +33,7 @@ const server = new ApolloServer({
 
     return {
       db,
-      userId: decodedToken?.uid || null,
+      userID: decodedToken?.uid || null,
     };
   }
 });
