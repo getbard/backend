@@ -7,7 +7,7 @@ const articles = async (
   args: null,
   context: Context
 ): Promise<Article[]> => {
-  const articles = await context.db.collection('articles').where('draft', '==', 'false').get();
+  const articles = await context.db.collection('articles').where('draft', '==', false).get();
   return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
 };
 
