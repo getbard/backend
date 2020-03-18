@@ -1,6 +1,6 @@
-import { Firestore } from '@google-cloud/firestore';
+import { firestore } from 'firebase-admin';
 
 export interface Context {
-  db: Firestore;
+  db: firestore.Firestore;
   userId: string | null;
 }

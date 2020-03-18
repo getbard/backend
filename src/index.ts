@@ -2,7 +2,7 @@ import './lib/env';
 
 import { ApolloServer, gql } from 'apollo-server';
 import { readFileSync } from 'fs';
-import firebase from 'firebase-admin';
+import * as firebase from 'firebase-admin';
 import fs from 'fs';
 
 import db from './lib/db';
