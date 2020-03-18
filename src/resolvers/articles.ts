@@ -37,14 +37,14 @@ const articleBySlug = async (
 
 const articlesByUser = async (
   _: null, 
-  args: { userID: string },
+  args: { userId: string },
   context: Context
 ): Promise<Article[]> => {
   const articlesRef = await context.db.collection('articles');
   let articles;
 
   // Filter out drafts if the requesting user isn't the author
-  if (context?.userID === args.userID) {
+  if (context?.userId === args.userId) {
     articles = await articlesRef.get();
   } else {
     articles = await articlesRef.where('draft', '==', 'false').get();
@@ -58,11 +58,11 @@ const createOrUpdateArticle = async (
   { input }: { input: CreateOrUpdateArticleInput },
   context: Context
 ): Promise<CreateOrUpdateArticlePayload> => {
-  if (!context.userID) {
+  if (!context.userId) {
     throw new AuthenticationError('Not authenticated');
   }
 
-  if (context?.userID !== input.userID) {
+  if (context?.userId !== input.userId) {
     throw new AuthenticationError('Not authorized');
   }
 

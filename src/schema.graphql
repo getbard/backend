@@ -2,7 +2,7 @@ type Query {
   articles: [Article]
   article(id: ID): Article
   articleBySlug(slug: String): Article
-  articlesByUser(userID: ID): Article
+  articlesByUser(userId: ID): Article
 }
 
 type Mutation {
@@ -23,7 +23,7 @@ type Article {
   draft: Boolean!
   createdAt: String!
   updatedAt: String!
-  userID: String!
+  userId: String!
   subscribersOnly: Boolean!
   slug: String!
 }
@@ -64,7 +64,7 @@ input CreateOrUpdateArticleInput {
   headerImageURL: String
   createdAt: String
   updatedAt: String
-  userID: String
+  userId: String
   subscribersOnly: Boolean!
   draft: Boolean
 }
