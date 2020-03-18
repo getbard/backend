@@ -1,4 +1,4 @@
-import { Firestore } from '@google-cloud/firestore';
+import { firestore } from 'firebase-admin';
 
 let config = {};
 
@@ -9,7 +9,7 @@ if (process.env.NODE_ENV !== 'development') {
   }
 }
 
-const db = new Firestore(config);
+const db = new firestore.Firestore(config);
 
 if (process.env.NODE_ENV === 'development') {
   db.settings({
