@@ -8,7 +8,7 @@ const articles = async (
   context: Context
 ): Promise<Article[]> => {
   const articles = await context.db.collection('articles').where('draft', '==', false).get();
-  return articles.docs.map(article => article.data()) as Article[];
+  return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
 };
 
 const article = async (
@@ -45,12 +45,15 @@ const articlesByUser = async (
 
   // Filter out drafts if the requesting user isn't the author
   if (context.userId === args.userId) {
-    articles = await articlesRef.get();
+    articles = await articlesRef.where('userId', '==', args.userId).get();
   } else {
-    articles = await articlesRef.where('draft', '==', false).get();
+    articles = await articlesRef
+      .where('userId', '==', args.userId)
+      .where('draft', '==', false)
+      .get();
   }
 
-  return articles.docs.map(article => article.data()) as Article[];
+  return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
 };
 
 const createOrUpdateArticle = async (
@@ -79,6 +82,8 @@ const createOrUpdateArticle = async (
     // Default values for new articles
     article.draft = true;
     article.createdAt = new Date().toISOString();
+    article.userId = context.userId;
+
     const articleRef = await context.db.collection('articles').add(article);
     articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
   }

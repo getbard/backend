@@ -13,7 +13,7 @@ type Article {
   id: ID!
   title: String!
   summary: String
-  content: String!
+  content: String
   headerImageURL: String
   author: User!
   categories: [Category]
@@ -58,14 +58,14 @@ type Comment {
 
 input CreateOrUpdateArticleInput {
   id:  ID
-  title: String!
+  title: String
   summary: String
-  content: String!
+  content: String
   headerImageURL: String
   createdAt: String
   updatedAt: String
   userId: String
-  subscribersOnly: Boolean!
+  subscribersOnly: Boolean
   draft: Boolean
 }
 
