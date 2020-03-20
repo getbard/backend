@@ -27,7 +27,7 @@ type Article {
   publishedAt: String
   userId: String!
   subscribersOnly: Boolean!
-  slug: String!
+  slug: String
 }
 
 type User {
@@ -81,4 +81,5 @@ input PublishArticleInput {
 
 type PublishArticlePayload {
   id: ID!
+  slug: String!
 }

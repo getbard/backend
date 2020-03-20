@@ -19,10 +19,12 @@
   "dependencies": {
     "@graphql-codegen/typescript-resolvers": "^1.13.0",
     "apollo-server": "^2.11.0",
+    "cuid": "^2.1.8",
     "dotenv": "^8.2.0",
     "firebase-admin": "^8.10.0",
     "graphql": "^14.6.0",
-    "lodash.merge": "^4.6.2"
+    "lodash.merge": "^4.6.2",
+    "slugify": "^1.4.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^1.13.0",

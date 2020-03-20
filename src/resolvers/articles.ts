@@ -1,4 +1,7 @@
 import { AuthenticationError, UserInputError } from 'apollo-server';
+import slugify from 'slugify';
+import cuid from 'cuid';
+
 import { Context } from '../types';
 import {
   Article,
@@ -6,6 +9,10 @@ import {
   CreateOrUpdateArticlePayload,
   PublishArticleInput,
 } from '../generated/graphql';
+
+const createArticleSlug = (articleTitle: string): string => {
+  return `${slugify(articleTitle.toLowerCase())}-${cuid.slug()}`;
+}
 
 const articles = async (
   _: null, 
@@ -120,12 +127,18 @@ const publishArticle = async (
     throw new UserInputError('Article already published');
   }
 
-  await context.db.doc(`articles/${article.id}`).set({
+  const updatedArticle = {
+    ...article,
     publishedAt: new Date().toISOString(),
     draft: false,
-  }, { merge: true });
+    slug: createArticleSlug(article.title),
+  }
 
-  return article;
+  await context.db
+    .doc(`articles/${article.id}`)
+    .set(updatedArticle, { merge: true });
+
+  return updatedArticle;
 }
 
 export default {
