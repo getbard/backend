@@ -37,3 +37,4 @@ steps:
     - 'managed'
 images:
     - 'gcr.io/$PROJECT_ID/backend:$COMMIT_SHA'
+timeout: '1200s'
