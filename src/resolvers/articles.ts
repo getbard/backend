@@ -1,6 +1,11 @@
-import { Article, CreateOrUpdateArticleInput, CreateOrUpdateArticlePayload } from '../generated/graphql';
+import { AuthenticationError, UserInputError } from 'apollo-server';
 import { Context } from '../types';
-import { AuthenticationError } from 'apollo-server';
+import {
+  Article,
+  CreateOrUpdateArticleInput,
+  CreateOrUpdateArticlePayload,
+  PublishArticleInput,
+} from '../generated/graphql';
 
 const articles = async (
   _: null, 
@@ -91,6 +96,38 @@ const createOrUpdateArticle = async (
   return { id: articleDoc.id, ...articleDoc.data() } as CreateOrUpdateArticlePayload;
 }
 
+const publishArticle = async (
+  _: null,
+  { input }: { input: PublishArticleInput },
+  context: Context
+): Promise<Article> => {
+  if (!context.userId) {
+    throw new AuthenticationError('Not authenticated');
+  }
+
+  const articleDoc = await context.db.doc(`articles/${input.id}`).get();
+  const article = { id: articleDoc.id, ...articleDoc.data() } as Article;
+
+  if (!article) {
+    throw new UserInputError('Article not found');
+  }
+
+  if (context?.userId !== article.userId) {
+    throw new AuthenticationError('Not authorized');
+  }
+
+  if (!article.draft) {
+    throw new UserInputError('Article already published');
+  }
+
+  await context.db.doc(`articles/${article.id}`).set({
+    publishedAt: new Date().toISOString(),
+    draft: false,
+  }, { merge: true });
+
+  return article;
+}
+
 export default {
   Query: {
     articles,
@@ -100,5 +137,6 @@ export default {
   },
   Mutation: {
     createOrUpdateArticle,
+    publishArticle,
   }
 }

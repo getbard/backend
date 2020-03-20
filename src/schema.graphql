@@ -1,12 +1,13 @@
 type Query {
   articles: [Article]
-  article(id: ID): Article
-  articleBySlug(slug: String): Article
-  articlesByUser(userId: ID): [Article]
+  article(id: ID!): Article
+  articleBySlug(slug: String!): Article
+  articlesByUser(userId: ID!): [Article]
 }
 
 type Mutation {
   createOrUpdateArticle(input: CreateOrUpdateArticleInput!): CreateOrUpdateArticlePayload!
+  publishArticle(input: PublishArticleInput!): PublishArticlePayload!
 }
 
 type Article {
@@ -23,6 +24,7 @@ type Article {
   draft: Boolean!
   createdAt: String!
   updatedAt: String!
+  publishedAt: String
   userId: String!
   subscribersOnly: Boolean!
   slug: String!
@@ -70,5 +72,13 @@ input CreateOrUpdateArticleInput {
 }
 
 type CreateOrUpdateArticlePayload {
+  id: ID!
+}
+
+input PublishArticleInput {
+  id: ID!
+}
+
+type PublishArticlePayload {
   id: ID!
 }
