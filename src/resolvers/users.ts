@@ -1,8 +1,13 @@
 
 import { AuthenticationError } from 'apollo-server';
+import cuid from 'cuid';
 
 import { Context } from '../types';
 import { User, CreateUserInput, CreateUserPayload } from '../generated/graphql';
+
+const createUsername = (name: string): string => {
+  return `${name.toLowerCase()}${cuid.slug()}`;
+}
 
 const me = async (
   _: null,
@@ -27,8 +32,15 @@ const createUser = async (
   { input }: { input: CreateUserInput },
   context: Context
 ): Promise<CreateUserPayload> => {
-  const userRef = await context.db.collection('users').add(input);
-  const userDoc = await context.db.doc(`articles/${userRef.id}`).get();
+  const fullname = input.lastName ? `${input.firstName}${input.lastName[0]}` : input.firstName;
+  const username = createUsername(fullname);
+
+  const userRef = await context.db.collection('users').add({
+    ...input,
+    username,
+  });
+
+  const userDoc = await context.db.doc(`users/${userRef.id}`).get();
   return { id: userDoc.id, ...userDoc.data() } as CreateUserPayload;
 }
 
