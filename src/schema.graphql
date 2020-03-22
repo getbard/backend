@@ -3,11 +3,13 @@ type Query {
   article(id: ID!): Article
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!): [Article]
+  me(userId: ID!): User!
 }
 
 type Mutation {
   createOrUpdateArticle(input: CreateOrUpdateArticleInput!): CreateOrUpdateArticlePayload!
   publishArticle(input: PublishArticleInput!): PublishArticlePayload!
+  createUser(input: CreateUserInput!): CreateUserPayload!
 }
 
 type Article {
@@ -32,7 +34,8 @@ type Article {
 
 type User {
   id: ID!
-  name: String
+  firstName: String!
+  lastName: String
   username: String!
   email: String!
   profileImageURL: String
@@ -82,4 +85,15 @@ input PublishArticleInput {
 type PublishArticlePayload {
   id: ID!
   slug: String!
+}
+
+input CreateUserInput {
+  email: String!
+  firstName: String!
+  lastName: String
+}
+
+type CreateUserPayload {
+  id: ID!
+  username: String!
 }
