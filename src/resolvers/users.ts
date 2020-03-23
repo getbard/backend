@@ -33,10 +33,12 @@ const me = async (
 
 const user = async (
   _: null,
-  args: { id: string },
+  args: { username: string },
   context: Context
 ): Promise<User | null> => {
-  return await getUserById(args.id, context);
+  const users = await context.db.collection('users').where('username', '==', args.username).get();
+  const usersWithData = users.docs.map(user => ({ id: user.id, ...user.data() })) as User[];
+  return usersWithData[0] || null;
 }
 
 const createUser = async (
@@ -50,6 +52,7 @@ const createUser = async (
   await context.db.doc(`users/${input.id}`).set({
     ...input,
     username,
+    createdAt: new Date().toISOString(),
   });
 
   const userDoc = await context.db.doc(`users/${input.id}`).get();
