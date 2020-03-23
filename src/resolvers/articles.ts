@@ -2,12 +2,15 @@ import { AuthenticationError, UserInputError } from 'apollo-server';
 import slugify from 'slugify';
 import cuid from 'cuid';
 
+import { getUserById } from './users';
+
 import { Context } from '../types';
 import {
   Article,
   CreateOrUpdateArticleInput,
   CreateOrUpdateArticlePayload,
   PublishArticleInput,
+  User,
 } from '../generated/graphql';
 
 const createArticleSlug = (articleTitle: string): string => {
@@ -141,6 +144,14 @@ const publishArticle = async (
   return updatedArticle;
 }
 
+const articleAuthor = async (
+  parent: Article,
+  _: null,
+  context: Context,
+): Promise<User | null> => {
+  return await getUserById(parent.userId, context);
+}
+
 export default {
   Query: {
     articles,
@@ -151,5 +162,8 @@ export default {
   Mutation: {
     createOrUpdateArticle,
     publishArticle,
-  }
+  },
+  Article: {
+    author: articleAuthor,
+  },
 }

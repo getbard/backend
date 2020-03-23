@@ -4,6 +4,7 @@ type Query {
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!): [Article]
   me(userId: ID!): User!
+  user(id: ID!): User
 }
 
 type Mutation {
@@ -88,6 +89,7 @@ type PublishArticlePayload {
 }
 
 input CreateUserInput {
+  id: ID!
   email: String!
   firstName: String!
   lastName: String
