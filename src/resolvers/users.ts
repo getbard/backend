@@ -9,6 +9,12 @@ const createUsername = (name: string): string => {
   return `${name.toLowerCase()}${cuid.slug()}`;
 }
 
+export const getUserById = async (id: string, context: Context): Promise<User | null> => {
+  const userDoc = await context.db.doc(`users/${id}`).get();
+  const user = userDoc.data() as User | undefined;
+  return user ? { id: userDoc.id, ...user } : null;
+}
+
 const me = async (
   _: null,
   args: { id: string },
@@ -22,9 +28,17 @@ const me = async (
     throw new AuthenticationError('Not authorized');
   }
 
-  const userDoc = await context.db.doc(`users/${args.id}`).get();
-  const user = userDoc.data() as User | undefined;
-  return user ? { id: userDoc.id, ...user } : null;
+  return await getUserById(args.id, context);
+}
+
+const user = async (
+  _: null,
+  args: { username: string },
+  context: Context
+): Promise<User | null> => {
+  const users = await context.db.collection('users').where('username', '==', args.username).get();
+  const usersWithData = users.docs.map(user => ({ id: user.id, ...user.data() })) as User[];
+  return usersWithData[0] || null;
 }
 
 const createUser = async (
@@ -35,18 +49,20 @@ const createUser = async (
   const fullname = input.lastName ? `${input.firstName}${input.lastName[0]}` : input.firstName;
   const username = createUsername(fullname);
 
-  const userRef = await context.db.collection('users').add({
+  await context.db.doc(`users/${input.id}`).set({
     ...input,
     username,
+    createdAt: new Date().toISOString(),
   });
 
-  const userDoc = await context.db.doc(`users/${userRef.id}`).get();
+  const userDoc = await context.db.doc(`users/${input.id}`).get();
   return { id: userDoc.id, ...userDoc.data() } as CreateUserPayload;
 }
 
 export default {
   Query: {
     me,
+    user,
   },
   Mutation: {
     createUser,
