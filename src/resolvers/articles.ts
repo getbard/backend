@@ -52,7 +52,10 @@ const articleBySlug = async (
 
 const articlesByUser = async (
   _: null, 
-  args: { userId: string },
+  args: {
+    userId: string;
+    drafts: boolean;
+  },
   context: Context
 ): Promise<Article[]> => {
   const articlesRef = await context.db.collection('articles');
@@ -60,7 +63,18 @@ const articlesByUser = async (
 
   // Filter out drafts if the requesting user isn't the author
   if (context.userId === args.userId) {
-    articles = await articlesRef.where('userId', '==', args.userId).get();
+    articles = await articlesRef
+      .where('userId', '==', args.userId)
+      .get();
+    
+    // Filter out user drafts if they weren't explicitely requested
+    // @TODO: Move this into a different request?
+    if (!args.drafts) {
+      return articles.docs.filter(article => {
+        const articleData = article.data();
+        return articleData.draft === false;
+      }).map(article => ({ id: article.id, ...article.data() })) as Article[];
+    }
   } else {
     articles = await articlesRef
       .where('userId', '==', args.userId)
