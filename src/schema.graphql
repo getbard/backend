@@ -5,6 +5,7 @@ type Query {
   articlesByUser(userId: ID!, drafts: Boolean): [Article]
   me(userId: ID!): User!
   user(username: String!): User
+  unsplashPhoto(search: String): [UnsplashPhoto]
 }
 
 type Mutation {
@@ -60,6 +61,20 @@ type Comment {
   replies: [Comment]
   createdAt: String!
   updatedAt: String!
+}
+
+type UnsplashPhoto {
+  id: ID!
+  urls: UnsplashPhotoURLs!
+  photographerName: String!
+}
+
+type UnsplashPhotoURLs {
+  raw: String!
+  full: String!
+  regular: String!
+  small: String!
+  thumb: String!
 }
 
 input CreateOrUpdateArticleInput {
