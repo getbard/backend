@@ -24,13 +24,15 @@
     "firebase-admin": "^8.10.0",
     "graphql": "^14.6.0",
     "lodash.merge": "^4.6.2",
-    "slugify": "^1.4.0"
+    "slugify": "^1.4.0",
+    "unsplash-js": "^6.0.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^1.13.0",
     "@graphql-codegen/typescript": "1.13.0",
     "@types/graphql": "^14.5.0",
     "@types/lodash.merge": "^4.6.6",
+    "@types/unsplash-js": "^6.0.1",
     "@typescript-eslint/eslint-plugin": "^2.23.0",
     "@typescript-eslint/parser": "^2.23.0",
     "concurrently": "^5.1.0",

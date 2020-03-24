@@ -1,4 +1,3 @@
-
 import { AuthenticationError } from 'apollo-server';
 import cuid from 'cuid';
 
