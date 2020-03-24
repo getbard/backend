@@ -1,3 +1,4 @@
+import { ResolversObject } from './../generated/graphql';
 import { AuthenticationError, UserInputError } from 'apollo-server';
 import slugify from 'slugify';
 import cuid from 'cuid';
