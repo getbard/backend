@@ -23,7 +23,12 @@ const articles = async (
   args: null,
   context: Context
 ): Promise<Article[]> => {
-  const articles = await context.db.collection('articles').where('draft', '==', false).get();
+  const articles = await context.db
+    .collection('articles')
+    .where('draft', '==', false)
+    .orderBy('updatedAt', 'desc')
+    .get();
+
   return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
 };
 
@@ -66,6 +71,7 @@ const articlesByUser = async (
   if (context.userId === args.userId) {
     articles = await articlesRef
       .where('userId', '==', args.userId)
+      .orderBy('updatedAt', 'desc')
       .get();
     
     // Filter out user drafts if they weren't explicitely requested
@@ -80,6 +86,7 @@ const articlesByUser = async (
     articles = await articlesRef
       .where('userId', '==', args.userId)
       .where('draft', '==', false)
+      .orderBy('updatedAt', 'desc')
       .get();
   }
 
