@@ -1,4 +1,3 @@
-import { ResolversObject } from './../generated/graphql';
 import { AuthenticationError, UserInputError } from 'apollo-server';
 import slugify from 'slugify';
 import cuid from 'cuid';
@@ -12,6 +11,7 @@ import {
   CreateOrUpdateArticlePayload,
   PublishArticleInput,
   User,
+  DeleteArticleInput,
 } from '../generated/graphql';
 
 const createArticleSlug = (articleTitle: string): string => {
@@ -25,7 +25,9 @@ const articles = async (
 ): Promise<Article[]> => {
   const articles = await context.db
     .collection('articles')
-    .where('draft', '==', false)
+    .where('publishedAt', '>', '')
+    .where('deletedAt', '==', null)
+    .orderBy('publishedAt', 'desc')
     .orderBy('updatedAt', 'desc')
     .get();
 
@@ -49,6 +51,7 @@ const articleBySlug = async (
 ): Promise<Article | null> => {
   const articles = await context.db
     .collection('articles')
+    .where('deletedAt', '==', null)
     .where('slug', '==', args.slug)
     .get();
 
@@ -71,21 +74,24 @@ const articlesByUser = async (
   if (context.userId === args.userId) {
     articles = await articlesRef
       .where('userId', '==', args.userId)
+      .where('deletedAt', '==', null)
       .orderBy('updatedAt', 'desc')
       .get();
-    
+
     // Filter out user drafts if they weren't explicitely requested
     // @TODO: Move this into a different request?
     if (!args.drafts) {
       return articles.docs.filter(article => {
         const articleData = article.data();
-        return articleData.draft === false;
+        return articleData.publishedAt;
       }).map(article => ({ id: article.id, ...article.data() })) as Article[];
     }
   } else {
     articles = await articlesRef
       .where('userId', '==', args.userId)
-      .where('draft', '==', false)
+      .where('publishedAt', '>', '')
+      .where('deletedAt', '==', null)
+      .orderBy('publishedAt', 'desc')
       .orderBy('updatedAt', 'desc')
       .get();
   }
@@ -106,7 +112,22 @@ const createOrUpdateArticle = async (
     throw new AuthenticationError('Not authorized');
   }
 
+  const defaultArticle = {
+    userId: context.userId,
+    title: '',
+    summary: '',
+    content: '',
+    headerImageURL: '',
+    slug: '',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    publishedAt: null,
+    deletedAt: null,
+    subscribersOnly: false,
+  };
+
   const article: CreateOrUpdateArticleInput = {
+    ...defaultArticle,
     ...input,
     updatedAt: new Date().toISOString(),
   };
@@ -116,11 +137,6 @@ const createOrUpdateArticle = async (
     await context.db.doc(`articles/${article.id}`).set(article, { merge: true });
     articleDoc = await context.db.doc(`articles/${article.id}`).get();
   } else {
-    // Default values for new articles
-    article.draft = true;
-    article.createdAt = new Date().toISOString();
-    article.userId = context.userId;
-
     const articleRef = await context.db.collection('articles').add(article);
     articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
   }
@@ -150,7 +166,7 @@ const publishArticle = async (
 
   let updatedArticle;
 
-  if (!article.draft) {
+  if (article.publishedAt) {
     updatedArticle = {
       ...article,
       ...input.article,
@@ -160,7 +176,6 @@ const publishArticle = async (
     updatedArticle = {
       ...article,
       publishedAt: new Date().toISOString(),
-      draft: false,
       slug: createArticleSlug(article.title),
     }
   }
@@ -170,6 +185,38 @@ const publishArticle = async (
     .set(updatedArticle, { merge: true });
 
   return updatedArticle as Article;
+}
+
+const deleteArticle = async (
+  _: null,
+  { input }: { input: DeleteArticleInput },
+  context: Context
+): Promise<Article> => {
+  if (!context.userId) {
+    throw new AuthenticationError('Not authenticated');
+  }
+
+  const articleDoc = await context.db.doc(`articles/${input.id}`).get();
+  const article = { id: articleDoc.id, ...articleDoc.data() } as Article;
+
+  if (!article) {
+    throw new UserInputError('Article not found');
+  }
+
+  if (context?.userId !== article.userId) {
+    throw new AuthenticationError('Not authorized');
+  }
+
+  const deleted = {
+    ...article,
+    deletedAt: new Date().toISOString()
+  };
+
+  await context.db
+    .doc(`articles/${article.id}`)
+    .set(deleted, { merge: true });
+
+  return deleted as Article;
 }
 
 const articleAuthor = async (
@@ -190,6 +237,7 @@ export default {
   Mutation: {
     createOrUpdateArticle,
     publishArticle,
+    deleteArticle,
   },
   Article: {
     author: articleAuthor,

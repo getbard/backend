@@ -11,6 +11,7 @@ type Query {
 type Mutation {
   createOrUpdateArticle(input: CreateOrUpdateArticleInput!): CreateOrUpdateArticlePayload!
   publishArticle(input: PublishArticleInput!): PublishArticlePayload!
+  deleteArticle(input: DeleteArticleInput!): DeleteArticlePayload!
   createUser(input: CreateUserInput!): CreateUserPayload!
 }
 
@@ -25,10 +26,10 @@ type Article {
   comments: [Comment]
   likes: Int!
   wordLength: Int!
-  draft: Boolean!
   createdAt: String!
   updatedAt: String!
   publishedAt: String
+  deletedAt: String
   userId: String!
   subscribersOnly: Boolean!
   slug: String
@@ -87,7 +88,6 @@ input CreateOrUpdateArticleInput {
   updatedAt: String
   userId: String
   subscribersOnly: Boolean
-  draft: Boolean
 }
 
 type CreateOrUpdateArticlePayload {
@@ -102,6 +102,14 @@ input PublishArticleInput {
 type PublishArticlePayload {
   id: ID!
   slug: String!
+}
+
+input DeleteArticleInput {
+  id: ID!
+}
+
+type DeleteArticlePayload {
+  id: ID!
 }
 
 input CreateUserInput {
