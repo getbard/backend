@@ -148,15 +148,21 @@ const publishArticle = async (
     throw new AuthenticationError('Not authorized');
   }
 
-  if (!article.draft) {
-    throw new UserInputError('Article already published');
-  }
+  let updatedArticle;
 
-  const updatedArticle = {
-    ...article,
-    publishedAt: new Date().toISOString(),
-    draft: false,
-    slug: createArticleSlug(article.title),
+  if (!article.draft) {
+    updatedArticle = {
+      ...article,
+      ...input.article,
+      updatedAt: new Date().toISOString(),
+    }
+  } else {
+    updatedArticle = {
+      ...article,
+      publishedAt: new Date().toISOString(),
+      draft: false,
+      slug: createArticleSlug(article.title),
+    }
   }
 
   await context.db

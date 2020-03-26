@@ -96,6 +96,7 @@ type CreateOrUpdateArticlePayload {
 
 input PublishArticleInput {
   id: ID!
+  article: CreateOrUpdateArticleInput
 }
 
 type PublishArticlePayload {
