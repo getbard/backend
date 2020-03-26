@@ -169,7 +169,7 @@ const publishArticle = async (
     .doc(`articles/${article.id}`)
     .set(updatedArticle, { merge: true });
 
-  return updatedArticle;
+  return updatedArticle as Article;
 }
 
 const articleAuthor = async (
