@@ -1,8 +1,15 @@
 import { AuthenticationError } from 'apollo-server';
 import cuid from 'cuid';
+import Stripe from 'stripe';
 
 import { Context } from '../types';
-import { User, CreateUserInput, CreateUserPayload } from '../generated/graphql';
+import {
+  User,
+  CreateUserInput,
+  CreateUserPayload,
+  ConnectStripeAccountInput,
+  ConnectStripeAccountPayload,
+} from '../generated/graphql';
 
 const createUsername = (name: string): string => {
   return `${name.toLowerCase()}${cuid.slug()}`;
@@ -23,11 +30,7 @@ const me = async (
     throw new AuthenticationError('Not authenticated');
   }
 
-  if (context?.userId !== args.id) {
-    throw new AuthenticationError('Not authorized');
-  }
-
-  return await getUserById(args.id, context);
+  return await getUserById(context.userId, context);
 }
 
 const user = async (
@@ -58,6 +61,41 @@ const createUser = async (
   return { id: userDoc.id, ...userDoc.data() } as CreateUserPayload;
 }
 
+const connectStripeAccount = async (
+  _: null,
+  { input }: { input: ConnectStripeAccountInput },
+  context: Context,
+): Promise<ConnectStripeAccountPayload> => {
+  if (!context.userId) {
+    throw new AuthenticationError('Not authenticated');
+  }
+
+  if (context?.userId !== input.userId) {
+    throw new AuthenticationError('Not authorized');
+  }
+
+  const stripe = Stripe('sk_test_WtKVEJcgAEXUHjsfLqY3ZS9q00hmWOSqqA');
+
+  const response = await stripe.oauth.token({
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    grant_type: 'authorization_code',
+    code: input.authCode,
+  });
+
+  const { stripe_user_id: stripeUserId, error } = response;
+
+  if (error) {
+    console.log('Failed to connect Stripe account:', error);
+    return { success: false };
+  }
+
+  await context.db.doc(`users/${input.userId}`).set({
+    stripeUserId,
+  }, { merge: true });
+
+  return { success: true };
+}
+
 export default {
   Query: {
     me,
@@ -65,5 +103,6 @@ export default {
   },
   Mutation: {
     createUser,
+    connectStripeAccount,
   }
 }

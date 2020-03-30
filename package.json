@@ -25,6 +25,7 @@
     "graphql": "^14.6.0",
     "lodash.merge": "^4.6.2",
     "slugify": "^1.4.0",
+    "stripe": "^8.38.0",
     "unsplash-js": "^6.0.0"
   },
   "devDependencies": {

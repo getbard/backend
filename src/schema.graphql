@@ -3,7 +3,7 @@ type Query {
   article(id: ID!): Article
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!, drafts: Boolean): [Article]
-  me(userId: ID!): User!
+  me: User!
   user(username: String!): User
   unsplashPhoto(search: String): [UnsplashPhoto]
 }
@@ -13,6 +13,7 @@ type Mutation {
   publishArticle(input: PublishArticleInput!): PublishArticlePayload!
   deleteArticle(input: DeleteArticleInput!): DeleteArticlePayload!
   createUser(input: CreateUserInput!): CreateUserPayload!
+  connectStripeAccount(input: ConnectStripeAccountInput!): ConnectStripeAccountPayload!
 }
 
 type Article {
@@ -46,6 +47,7 @@ type User {
   followers: [User]
   createdAt: String!
   updatedAt: String!
+  stripeUserId: String
 }
 
 type Category {
@@ -122,4 +124,13 @@ input CreateUserInput {
 type CreateUserPayload {
   id: ID!
   username: String!
+}
+
+input ConnectStripeAccountInput {
+  userId: String!
+  authCode: String!
+}
+
+type ConnectStripeAccountPayload {
+  success: Boolean!
 }
