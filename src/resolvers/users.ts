@@ -74,7 +74,7 @@ const connectStripeAccount = async (
     throw new AuthenticationError('Not authorized');
   }
 
-  const stripe = Stripe('sk_test_WtKVEJcgAEXUHjsfLqY3ZS9q00hmWOSqqA');
+  const stripe = new Stripe('sk_test_WtKVEJcgAEXUHjsfLqY3ZS9q00hmWOSqqA');
 
   const response = await stripe.oauth.token({
     // eslint-disable-next-line @typescript-eslint/camelcase
