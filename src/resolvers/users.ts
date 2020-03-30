@@ -1,4 +1,4 @@
-import { AuthenticationError } from 'apollo-server';
+import { AuthenticationError, ApolloError } from 'apollo-server';
 import cuid from 'cuid';
 import Stripe from 'stripe';
 
@@ -76,26 +76,27 @@ const connectStripeAccount = async (
 
   const stripe = new Stripe('sk_test_WtKVEJcgAEXUHjsfLqY3ZS9q00hmWOSqqA', {
     apiVersion: '2020-03-02',
+    typescript: true,
   });
 
-  const response = await stripe.oauth.token({
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    grant_type: 'authorization_code',
-    code: input.authCode,
-  });
+  try {
+    const response = await stripe.oauth.token({
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      grant_type: 'authorization_code',
+      code: input.authCode,
+    });
 
-  const { stripe_user_id: stripeUserId, error } = response;
+    const { stripe_user_id: stripeUserId } = response;
 
-  if (error) {
-    console.log('Failed to connect Stripe account:', error);
-    return { success: false };
+    await context.db.doc(`users/${input.userId}`).set({
+      stripeUserId,
+    }, { merge: true });
+
+    return { success: true };
+  } catch (error) {
+    console.log('Failed to connect Stripe account:', error.message);
+    throw new ApolloError(error);
   }
-
-  await context.db.doc(`users/${input.userId}`).set({
-    stripeUserId,
-  }, { merge: true });
-
-  return { success: true };
 }
 
 export default {
