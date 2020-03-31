@@ -18,19 +18,28 @@ const createArticleSlug = (articleTitle: string): string => {
   return `${slugify(articleTitle.toLowerCase())}-${cuid.slug()}`;
 }
 
-const shouldBlockContent = async (article: Article, context: Context): boolean => {
+const shouldBlockContent = async (article: Article | undefined, context: Context): Promise<boolean> => {
+  if (!article) {
+    return false
+  }
+
+  if (article.subscribersOnly && !context.userId) {
+    return true;
+  }
+
   const articleAuthor = await getUserById(article.userId, context);
-  const articleSubs = articleAuthor?.subcribers || [];
+  const articleSubs = articleAuthor?.subscribers || [];
   return article.subscribersOnly && !articleSubs.includes(context.userId) && article.userId !== context.userId;
 }
 
-const getArticleContent = async (article: Article, contentBlocked: boolean): string => {
+const getArticleContent = (article: Article, contentBlocked: boolean): string => {
   if (contentBlocked) {
     // Remove all content except the first Slate node
-    return JSON.stringify([JSON.parse(article.content)[0]]);
+    // Fallback to empty node for safety
+    return JSON.stringify([JSON.parse(article.content || '[{"type":"paragraph","children":[{"text":""}]}]')[0]]);
   }
 
-  return article.content;
+  return article.content || '';
 }
 
 const articles = async (

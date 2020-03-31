@@ -44,9 +44,9 @@ type User {
   username: String!
   email: String!
   profileImageURL: String
-  following: [User]
-  followers: [User]
-  subscribers: [User]
+  following: [String]
+  followers: [String]
+  subscribers: [String]
   createdAt: String!
   updatedAt: String!
   stripeUserId: String
