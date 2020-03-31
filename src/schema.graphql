@@ -34,6 +34,7 @@ type Article {
   userId: String!
   subscribersOnly: Boolean!
   slug: String
+  contentBlocked: Boolean
 }
 
 type User {
@@ -45,6 +46,7 @@ type User {
   profileImageURL: String
   following: [User]
   followers: [User]
+  subscribers: [User]
   createdAt: String!
   updatedAt: String!
   stripeUserId: String
