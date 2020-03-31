@@ -18,6 +18,21 @@ const createArticleSlug = (articleTitle: string): string => {
   return `${slugify(articleTitle.toLowerCase())}-${cuid.slug()}`;
 }
 
+const shouldBlockContent = async (article: Article, context: Context): boolean => {
+  const articleAuthor = await getUserById(article.userId, context);
+  const articleSubs = articleAuthor?.subcribers || [];
+  return article.subscribersOnly && !articleSubs.includes(context.userId) && article.userId !== context.userId;
+}
+
+const getArticleContent = async (article: Article, contentBlocked: boolean): string => {
+  if (contentBlocked) {
+    // Remove all content except the first Slate node
+    return JSON.stringify([JSON.parse(article.content)[0]]);
+  }
+
+  return article.content;
+}
+
 const articles = async (
   _: null, 
   args: null,
@@ -41,7 +56,14 @@ const article = async (
 ): Promise<Article | null> => {
   const articleDoc = await context.db.doc(`articles/${args.id}`).get();
   const article = articleDoc.data() as Article | undefined;
-  return article ? { id: articleDoc.id, ...article } : null;
+  const contentBlocked = await shouldBlockContent(article, context);
+
+  return article ? {
+    id: articleDoc.id,
+    ...article,
+    content: getArticleContent(article, contentBlocked),
+    contentBlocked,
+  } : null;
 }
 
 const articleBySlug = async (
@@ -54,9 +76,15 @@ const articleBySlug = async (
     .where('deletedAt', '==', null)
     .where('slug', '==', args.slug)
     .get();
-
   const article = articles.docs[0].data() as Article | undefined;
-  return article ? { id: articles.docs[0].id, ...article } : null;
+  const contentBlocked = await shouldBlockContent(article, context);
+
+  return article ? {
+    id: articles.docs[0].id,
+    ...article,
+    content: getArticleContent(article, contentBlocked),
+    contentBlocked,
+  } : null;
 }
 
 const articlesByUser = async (
