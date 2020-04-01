@@ -72,7 +72,7 @@ const connectStripeAccount = async (
     throw new AuthenticationError('Not authorized');
   }
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
     apiVersion: '2020-03-02',
     typescript: true,
   });
@@ -106,7 +106,7 @@ const createStripeSession = async (
     throw new AuthenticationError('Not authenticated');
   }
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
     apiVersion: '2020-03-02',
     typescript: true,
   });
