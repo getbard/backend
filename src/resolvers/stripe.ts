@@ -1,7 +1,9 @@
 import { AuthenticationError, ApolloError } from 'apollo-server';
 import Stripe from 'stripe';
 
+import { Context } from '../types';
 import {
+  StripeSession,
   ConnectStripeAccountInput,
   ConnectStripeAccountPayload,
   CreateStripeSessionInput,
@@ -28,6 +30,33 @@ const formatAmountForStripe = (
   }
 
   return zeroDecimalCurrency ? amount : Math.round(amount * 100);
+}
+
+const stripeSession = async (
+  _: null,
+  args: { id: string },
+  context: Context,
+): Promise<StripeSession> => {
+  if (!context.userId) {
+    throw new AuthenticationError('Not authenticated');
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2020-03-02',
+    typescript: true,
+  });
+
+  const checkoutSession: Stripe.Checkout.Session = await stripe.checkout.sessions.retrieve(
+    args.id,
+    { expand: ['payment_intent'] },
+  );
+
+  return {
+    id: args.id,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    status: checkoutSession?.payment_intent?.status,
+  };
 }
 
 const connectStripeAccount = async (
@@ -92,8 +121,8 @@ const createStripeSession = async (
       currency: 'usd',
       quantity: 1,
     }],
-    success_url: 'http://localhost:3000/result?session_id={CHECKOUT_SESSION_ID}',
-    cancel_url: 'http://localhost:3000/result?session_id={CHECKOUT_SESSION_ID}',
+    success_url: `${input.redirectUrl}?sessionId={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${input.redirectUrl}`,
   }
   /* eslint-enable @typescript-eslint/camelcase */
 
@@ -103,6 +132,9 @@ const createStripeSession = async (
 }
 
 export default {
+  Query: {
+    stripeSession,
+  },
   Mutation: {
     connectStripeAccount,
     createStripeSession,

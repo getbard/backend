@@ -4,6 +4,7 @@ type Query {
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!, drafts: Boolean): [Article]
   me: User!
+  stripeSession(id: ID!): StripeSession!
   user(username: String!): User
   unsplashPhoto(search: String): [UnsplashPhoto]
 }
@@ -83,6 +84,11 @@ type UnsplashPhotoURLs {
   thumb: String!
 }
 
+type StripeSession {
+  id: ID!
+  status: String
+}
+
 input CreateOrUpdateArticleInput {
   id:  ID
   title: String
@@ -140,6 +146,7 @@ type ConnectStripeAccountPayload {
 
 input CreateStripeSessionInput {
   amount: Int!
+  redirectUrl: String!
 }
 
 type CreateStripeSessionPayload {
