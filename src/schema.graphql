@@ -14,6 +14,7 @@ type Mutation {
   deleteArticle(input: DeleteArticleInput!): DeleteArticlePayload!
   createUser(input: CreateUserInput!): CreateUserPayload!
   connectStripeAccount(input: ConnectStripeAccountInput!): ConnectStripeAccountPayload!
+  createStripeSession(input: CreateStripeSessionInput): CreateStripeSessionPayload!
 }
 
 type Article {
@@ -135,4 +136,12 @@ input ConnectStripeAccountInput {
 
 type ConnectStripeAccountPayload {
   success: Boolean!
+}
+
+input CreateStripeSessionInput {
+  amount: Int!
+}
+
+type CreateStripeSessionPayload {
+  id: ID!
 }
