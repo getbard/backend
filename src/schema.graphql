@@ -4,6 +4,7 @@ type Query {
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!, drafts: Boolean): [Article]
   me: User!
+  stripeSession(id: ID!): StripeSession!
   user(username: String!): User
   unsplashPhoto(search: String): [UnsplashPhoto]
 }
@@ -14,6 +15,7 @@ type Mutation {
   deleteArticle(input: DeleteArticleInput!): DeleteArticlePayload!
   createUser(input: CreateUserInput!): CreateUserPayload!
   connectStripeAccount(input: ConnectStripeAccountInput!): ConnectStripeAccountPayload!
+  createStripeSession(input: CreateStripeSessionInput): CreateStripeSessionPayload!
 }
 
 type Article {
@@ -82,6 +84,11 @@ type UnsplashPhotoURLs {
   thumb: String!
 }
 
+type StripeSession {
+  id: ID!
+  status: String
+}
+
 input CreateOrUpdateArticleInput {
   id:  ID
   title: String
@@ -135,4 +142,13 @@ input ConnectStripeAccountInput {
 
 type ConnectStripeAccountPayload {
   success: Boolean!
+}
+
+input CreateStripeSessionInput {
+  amount: Int!
+  redirectUrl: String!
+}
+
+type CreateStripeSessionPayload {
+  id: ID!
 }
