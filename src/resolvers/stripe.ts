@@ -43,6 +43,8 @@ const createDefaultStripePlan = async ({ userId, stripeUserId, context }: {
     return;
   }
 
+  const user = await getUserById(userId, context);
+
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
     apiVersion: '2020-03-02',
     typescript: true,
@@ -53,7 +55,7 @@ const createDefaultStripePlan = async ({ userId, stripeUserId, context }: {
       amount: formatAmountForStripe(10, 'usd'),
       currency: 'usd',
       interval: 'month',
-      product: { name: 'Monthly Support' },
+      product: { name: `${user?.firstName || 'Author Support'} on Bard` },
     }, {
       stripeAccount: stripeUserId,
     });
@@ -68,7 +70,7 @@ const createDefaultStripePlan = async ({ userId, stripeUserId, context }: {
 
 const stripeSession = async (
   _: null,
-  args: { id: string },
+  args: { id: string; stripeUserId: string },
   context: Context,
 ): Promise<StripeSession> => {
   if (!context.userId) {
@@ -83,6 +85,7 @@ const stripeSession = async (
   const checkoutSession: Stripe.Checkout.Session = await stripe.checkout.sessions.retrieve(
     args.id,
     { expand: ['payment_intent'] },
+    { stripeAccount: args.stripeUserId }
   );
 
   return {
@@ -113,9 +116,10 @@ const connectStripeAccount = async (
 
   try {
     const response = await stripe.oauth.token({
-      // eslint-disable-next-line @typescript-eslint/camelcase
+      /* eslint-disable @typescript-eslint/camelcase */
       grant_type: 'authorization_code',
       code: input.authCode,
+      /* eslint-enable @typescript-eslint/camelcase */
     });
 
     const { stripe_user_id: stripeUserId } = response;
@@ -132,7 +136,7 @@ const connectStripeAccount = async (
 
     return { success: true };
   } catch (error) {
-    console.log('Failed to connect Stripe account:', error.message);
+    console.error('Failed to connect Stripe account:', error.message);
     throw new ApolloError(error);
   }
 }
@@ -146,16 +150,16 @@ const createStripeSession = async (
     throw new AuthenticationError('Not authenticated');
   }
 
-  const stripeUser = await getUserById(input.userId, context);
-
-  if (!stripeUser) {
+  if (!input.stripeUserId) {
     throw new UserInputError('User not found');
   }
-  
-  const connectedStripeAccountId = stripeUser?.stripeUserId || '';
+
+  if (!input.plan && !input.amount) {
+    throw new UserInputError('Invalid Stripe plan');
+  }
 
   if (!connectStripeAccount) {
-    console.error('Failed to create a Stripe session, Stripe account not found on user:', stripeUser.id);
+    console.error('Failed to create a Stripe session, user not found with Stripe ID:', input.stripeUserId);
     throw new ApolloError('Could not find Stripe account for user');
   }
 
@@ -164,30 +168,42 @@ const createStripeSession = async (
     typescript: true,
   });
 
-  const applicationFee = +(input.amount * 0.10).toFixed(2);
-
   /* eslint-disable @typescript-eslint/camelcase */
   const params: Stripe.Checkout.SessionCreateParams = {
-    submit_type: 'donate',
     payment_method_types: ['card'],
-    line_items: [{
+    success_url: `${input.redirectUrl}?sessionId={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${input.redirectUrl}`,
+  }
+
+  if (input.amount) {
+    params.submit_type = 'donate';
+
+    params.line_items = [{
       name: 'One-Time Support',
       amount: formatAmountForStripe(input.amount, 'usd'),
       currency: 'usd',
       quantity: 1,
-    }],
-    payment_intent_data: {
+    }];
+
+    const applicationFee = +(input.amount * 0.10).toFixed(2);
+    params.payment_intent_data = {
       application_fee_amount: formatAmountForStripe(applicationFee, 'usd'),
-      transfer_data: {
-        destination: connectedStripeAccountId,
-      },
-    },
-    success_url: `${input.redirectUrl}?sessionId={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${input.redirectUrl}`,
+    };
+  }
+
+  if (input.plan) {
+    params.subscription_data = {
+      items: [{
+        plan: input.plan.id,
+      }],
+      application_fee_percent: 10,
+    };
   }
   /* eslint-enable @typescript-eslint/camelcase */
 
-  const checkoutSession: Stripe.Checkout.Session = await stripe.checkout.sessions.create(params);
+  const checkoutSession: Stripe.Checkout.Session = await stripe.checkout.sessions.create(params, {
+    stripeAccount: input.stripeUserId || undefined,
+  });
 
   return checkoutSession;
 }
