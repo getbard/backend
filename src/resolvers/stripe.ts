@@ -34,6 +34,38 @@ const formatAmountForStripe = (
   return zeroDecimalCurrency ? amount : Math.round(amount * 100);
 }
 
+const createDefaultStripePlan = async ({ userId, stripeUserId, context }: {
+  context: Context;
+  userId: string;
+  stripeUserId: string | undefined;
+}): Promise<void> => {
+  if (!stripeUserId && !userId) {
+    return;
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2020-03-02',
+    typescript: true,
+  });
+
+  try {
+    const plan = await stripe.plans.create({
+      amount: formatAmountForStripe(10, 'usd'),
+      currency: 'usd',
+      interval: 'month',
+      product: { name: 'Monthly Support' },
+    }, {
+      stripeAccount: stripeUserId,
+    });
+
+    await context.db.doc(`users/${userId}`).set({
+      stripePlanId: plan.id,
+    }, { merge: true });
+  } catch (error) {
+    console.log('Failed to create default plan:', error.message);
+  }
+}
+
 const stripeSession = async (
   _: null,
   args: { id: string },
@@ -91,6 +123,12 @@ const connectStripeAccount = async (
     await context.db.doc(`users/${input.userId}`).set({
       stripeUserId,
     }, { merge: true });
+
+    createDefaultStripePlan({
+      context,
+      userId: input.userId,
+      stripeUserId,
+    });
 
     return { success: true };
   } catch (error) {
