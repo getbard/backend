@@ -1,5 +1,7 @@
-import { AuthenticationError, ApolloError } from 'apollo-server';
+import { AuthenticationError, ApolloError, UserInputError } from 'apollo-server';
 import Stripe from 'stripe';
+
+import { getUserById } from './users';
 
 import { Context } from '../types';
 import {
@@ -106,10 +108,25 @@ const createStripeSession = async (
     throw new AuthenticationError('Not authenticated');
   }
 
+  const stripeUser = await getUserById(input.userId, context);
+
+  if (!stripeUser) {
+    throw new UserInputError('User not found');
+  }
+  
+  const connectedStripeAccountId = stripeUser?.stripeUserId || '';
+
+  if (!connectStripeAccount) {
+    console.error('Failed to create a Stripe session, Stripe account not found on user:', stripeUser.id);
+    throw new ApolloError('Could not find Stripe account for user');
+  }
+
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
     apiVersion: '2020-03-02',
     typescript: true,
   });
+
+  const applicationFee = +(input.amount * 0.10).toFixed(2);
 
   /* eslint-disable @typescript-eslint/camelcase */
   const params: Stripe.Checkout.SessionCreateParams = {
@@ -121,6 +138,12 @@ const createStripeSession = async (
       currency: 'usd',
       quantity: 1,
     }],
+    payment_intent_data: {
+      application_fee_amount: formatAmountForStripe(applicationFee, 'usd'),
+      transfer_data: {
+        destination: connectedStripeAccountId,
+      },
+    },
     success_url: `${input.redirectUrl}?sessionId={CHECKOUT_SESSION_ID}`,
     cancel_url: `${input.redirectUrl}`,
   }

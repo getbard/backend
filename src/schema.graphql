@@ -147,6 +147,7 @@ type ConnectStripeAccountPayload {
 input CreateStripeSessionInput {
   amount: Int!
   redirectUrl: String!
+  userId: String!
 }
 
 type CreateStripeSessionPayload {
