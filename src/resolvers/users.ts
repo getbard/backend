@@ -1,9 +1,11 @@
-import { AuthenticationError } from 'apollo-server';
+import { AuthenticationError, UserInputError } from 'apollo-server';
 import cuid from 'cuid';
+import Stripe from 'stripe';
 
 import { Context } from '../types';
 import {
   User,
+  StripePlan,
   CreateUserInput,
   CreateUserPayload,
 } from '../generated/graphql';
@@ -58,6 +60,38 @@ const createUser = async (
   return { id: userDoc.id, ...userDoc.data() } as CreateUserPayload;
 }
 
+const stripePlan = async (
+  parent: User,
+  _: null,
+  context: Context,
+): Promise<StripePlan | null> => {
+  const stripeUser = await getUserById(parent.id, context);
+
+  if (!stripeUser) {
+    throw new UserInputError('User not found');
+  }
+
+  if (!stripeUser?.stripePlanId || !stripeUser?.stripeUserId) {
+    return null;
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2020-03-02',
+    typescript: true,
+  });
+
+  const plan: Stripe.Plan = await stripe.plans.retrieve(stripeUser.stripePlanId, undefined, {
+    stripeAccount: stripeUser.stripeUserId || undefined,
+  });
+
+  return {
+    id: plan.id,
+    currency: plan.currency,
+    amount: plan.amount,
+    interval: plan.interval,
+  };
+}
+
 export default {
   Query: {
     me,
@@ -66,4 +100,7 @@ export default {
   Mutation: {
     createUser,
   },
+  User: {
+    stripePlan,
+  }
 }

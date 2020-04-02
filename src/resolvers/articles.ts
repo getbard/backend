@@ -256,7 +256,7 @@ const deleteArticle = async (
   return deleted as Article;
 }
 
-const articleAuthor = async (
+const author = async (
   parent: Article,
   _: null,
   context: Context,
@@ -277,6 +277,6 @@ export default {
     deleteArticle,
   },
   Article: {
-    author: articleAuthor,
+    author,
   },
 }
