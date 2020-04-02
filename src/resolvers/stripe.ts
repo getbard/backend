@@ -64,7 +64,7 @@ const createDefaultStripePlan = async ({ userId, stripeUserId, context }: {
       stripePlanId: plan.id,
     }, { merge: true });
   } catch (error) {
-    console.log('Failed to create default plan:', error.message);
+    console.error('Failed to create default plan:', error.message);
   }
 }
 

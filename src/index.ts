@@ -27,7 +27,7 @@ const server = new ApolloServer({
       try {
         decodedToken = await firebase.auth().verifyIdToken(token.split(' ')[1]);
       } catch(error) {
-        console.log('Invalid token sent from client:', error);
+        console.error('Invalid token sent from client:', error);
       }
     }
 
