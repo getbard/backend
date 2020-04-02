@@ -37,9 +37,20 @@ const user = async (
   args: { username: string },
   context: Context
 ): Promise<User | null> => {
-  const users = await context.db.collection('users').where('username', '==', args.username).get();
-  const usersWithData = users.docs.map(user => ({ id: user.id, ...user.data() })) as User[];
-  return usersWithData[0] || null;
+  let user;
+  if (args.username === 'me') {
+    if (!context.userId) {
+      throw new AuthenticationError('Not authenticated');
+    }
+
+    user = await getUserById(context.userId, context);
+  } else {
+    const users = await context.db.collection('users').where('username', '==', args.username).get();
+    const usersWithData = users.docs.map(user => ({ id: user.id, ...user.data() })) as User[];
+    user = usersWithData[0];
+  }
+
+  return user || null;
 }
 
 const createUser = async (
