@@ -117,7 +117,7 @@ const createStripeSession = async (
   const connectedStripeAccountId = stripeUser?.stripeUserId || '';
 
   if (!connectStripeAccount) {
-    console.log('Failed to create a Stripe session, Stripe account not found on user:', stripeUser.id);
+    console.error('Failed to create a Stripe session, Stripe account not found on user:', stripeUser.id);
     throw new ApolloError('Could not find Stripe account for user');
   }
 
