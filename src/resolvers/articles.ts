@@ -154,7 +154,7 @@ const createOrUpdateArticle = async (
     title: '',
     summary: '',
     content: '',
-    headerImageURL: '',
+    headerImage: null,
     slug: '',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
