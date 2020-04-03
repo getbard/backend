@@ -14,7 +14,12 @@ const unsplash = new Unsplash({ accessKey: process.env.UNSPLASH_ACCESS_KEY || ''
 type UnsplashPhotoObject = {
   id: string;
   urls: { [key: string]: string };
-  user: { name: string };
+  user: {
+    name: string;
+    links: {
+      html: string;
+    };
+  };
 }
 
 const unsplashPhoto = async (
@@ -39,6 +44,7 @@ const unsplashPhoto = async (
     id,
     urls,
     photographerName: user.name,
+    photographerUrl: user.links.html,
   })) as UnsplashPhoto;
 }
 

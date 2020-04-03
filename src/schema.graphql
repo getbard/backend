@@ -18,12 +18,19 @@ type Mutation {
   createStripeSession(input: CreateStripeSessionInput): CreateStripeSessionPayload!
 }
 
+type ArticleHeaderImage {
+  id: ID!
+  url: String!
+  photographerName: String!
+  photographerUrl: String!
+}
+
 type Article {
   id: ID!
   title: String!
   summary: String
   content: String
-  headerImageURL: String
+  headerImage: ArticleHeaderImage
   author: User!
   categories: [Category]
   comments: [Comment]
@@ -76,6 +83,7 @@ type UnsplashPhoto {
   id: ID!
   urls: UnsplashPhotoURLs!
   photographerName: String!
+  photographerUrl: String!
 }
 
 type UnsplashPhotoURLs {
@@ -98,12 +106,19 @@ type StripePlan {
   interval: String!
 }
 
+input ArticleHeaderImageInput {
+  id: ID!
+  url: String!
+  photographerName: String!
+  photographerUrl: String!
+}
+
 input CreateOrUpdateArticleInput {
   id:  ID
   title: String
   summary: String
   content: String
-  headerImageURL: String
+  headerImage: ArticleHeaderImageInput
   createdAt: String
   updatedAt: String
   userId: String
