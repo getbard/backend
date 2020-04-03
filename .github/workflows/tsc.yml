@@ -4,6 +4,8 @@ on: [push]
 
 jobs:
   build:
+    name: TypeScript Compile
+
     runs-on: ubuntu-latest
 
     steps:

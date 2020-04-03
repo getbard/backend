@@ -4,6 +4,8 @@ on: [push]
 
 jobs:
   build:
+    name: Lint
+
     runs-on: ubuntu-latest
 
     steps:
