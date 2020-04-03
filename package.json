@@ -14,7 +14,8 @@
     "start:watch": "tsnd --respawn src/index.ts",
     "start:production": "node src/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "generate": "graphql-codegen --config codegen.yaml"
+    "generate": "graphql-codegen --config codegen.yaml",
+    "firestore": "gcloud beta emulators firestore start --host-port localhost:8989"
   },
   "dependencies": {
     "@graphql-codegen/typescript-resolvers": "^1.13.0",
