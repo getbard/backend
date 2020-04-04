@@ -161,6 +161,7 @@ const createOrUpdateArticle = async (
     publishedAt: null,
     deletedAt: null,
     subscribersOnly: false,
+    wordCount: 0,
   };
 
   const article: CreateOrUpdateArticleInput = {

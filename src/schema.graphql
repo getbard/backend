@@ -35,7 +35,7 @@ type Article {
   categories: [Category]
   comments: [Comment]
   likes: Int!
-  wordLength: Int!
+  wordCount: Int!
   createdAt: String!
   updatedAt: String!
   publishedAt: String
@@ -123,6 +123,7 @@ input CreateOrUpdateArticleInput {
   updatedAt: String
   userId: String
   subscribersOnly: Boolean
+  wordCount: Int
 }
 
 type CreateOrUpdateArticlePayload {
