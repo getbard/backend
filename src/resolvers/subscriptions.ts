@@ -83,7 +83,7 @@ export const createSubscription = async (
   const subscriptions = await context.db.collection('subscriptions')
     .where('userId', '==', context.userId)
     .where('authorId', '==', author.id)
-    .where('deleteAt', '==', null)
+    .where('deletedAt', '==', null)
     .get();
   const existingSubscriptions = subscriptions.docs
     .map(subscription => ({ id: subscription.id, ...subscription.data() }));

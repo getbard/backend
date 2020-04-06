@@ -135,6 +135,34 @@ const subscriptions = async (
     });
 }
 
+const subscribers = async (
+  parent: User,
+  _: null,
+  context: Context,
+): Promise<Promise<string>[]> => {
+  const user = await getUserById(parent.id, context);
+
+  if (!user) {
+    throw new UserInputError('User not found');
+  }
+
+  const subscriptions = await context.db
+    .collection('subscriptions')
+    .where('authorId', '==', user.id)
+    .where('deletedAt', '==', null)
+    .get();
+
+  return subscriptions.docs
+    .map(async (subDoc): Promise<string> => {
+      const subscription = {
+        id: subDoc.id,
+        ...subDoc.data()
+      } as Subscription;
+      
+      return subscription.userId;
+    });
+}
+
 export default {
   Query: {
     user,
@@ -145,5 +173,6 @@ export default {
   User: {
     stripePlan,
     subscriptions,
+    subscribers,
   }
 }
