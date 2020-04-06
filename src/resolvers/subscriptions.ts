@@ -80,6 +80,19 @@ export const createSubscription = async (
     throw new ApolloError('Could not find Stripe account for user');
   }
 
+  const subscriptions = await context.db.collection('subscriptions')
+    .where('userId', '==', context.userId)
+    .where('authorId', '==', author.id)
+    .where('deleteAt', '==', null)
+    .get();
+  const existingSubscriptions = subscriptions.docs
+    .map(subscription => ({ id: subscription.id, ...subscription.data() }));
+
+  // Return early if a sub already exists for the user/author and is active
+  if (existingSubscriptions.length) {
+    return existingSubscriptions[0] as CreateSubscriptionPayload;
+  }
+
   const subscriptionRef = await context.db.collection('subscriptions').add({
     ...input,
     userId: context.userId,
