@@ -1,7 +1,8 @@
 import { AuthenticationError, ApolloError, UserInputError } from 'apollo-server';
 import Stripe from 'stripe';
 
-import { getUserById } from './users';
+import { getUserById, getUserByStripeId } from './users';
+import { createSubscription } from './subscriptions';
 
 import { Context } from '../types';
 import {
@@ -88,11 +89,29 @@ const stripeSession = async (
     { stripeAccount: args.stripeUserId }
   );
 
+  if (checkoutSession.mode === 'subscription' && checkoutSession?.subscription) {
+    try {
+      await createSubscription(null, { input: {
+        stripeUserId: args.stripeUserId,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // @ts-ignore
+        stripeSubscriptionId:  checkoutSession.subscription,
+      } }, context);
+    } catch (error) {
+      console.log('Failed to create a Stripe subscription:', error);
+      throw new ApolloError('Failed to create a Stripe subscription');
+    }
+  }
+
+  // TODO: Resolve type issues here...
   return {
     id: args.id,
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     status: checkoutSession?.payment_intent?.status,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    subscription: checkoutSession?.subscription,
   };
 }
 
@@ -158,7 +177,7 @@ const createStripeSession = async (
     throw new UserInputError('Invalid Stripe plan');
   }
 
-  if (!connectStripeAccount) {
+  if (!getUserByStripeId(input.stripeUserId, context)) {
     console.error('Failed to create a Stripe session, user not found with Stripe ID:', input.stripeUserId);
     throw new ApolloError('Could not find Stripe account for user');
   }

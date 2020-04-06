@@ -2,10 +2,13 @@ import { AuthenticationError, UserInputError } from 'apollo-server';
 import cuid from 'cuid';
 import Stripe from 'stripe';
 
+import { getSubscriptionWithStripeData } from './subscriptions';
+
 import { Context } from '../types';
 import {
   User,
   StripePlan,
+  Subscription,
   CreateUserInput,
   CreateUserPayload,
 } from '../generated/graphql';
@@ -20,23 +23,18 @@ export const getUserById = async (id: string, context: Context): Promise<User | 
   return user ? { id: userDoc.id, ...user } : null;
 }
 
-const me = async (
-  _: null,
-  args: { id: string },
-  context: Context
-): Promise<User | null> => {
-  if (!context.userId) {
-    throw new AuthenticationError('Not authenticated');
-  }
-
-  return await getUserById(context.userId, context);
+export const getUserByStripeId = async (stripeUserId: string, context: Context): Promise<User | null> => {
+  const users = await context.db.collection('users').where('stripeUserId', '==', stripeUserId).get();
+  const usersWithData = users.docs.map(user => ({ id: user.id, ...user.data() })) as User[];
+  const user = usersWithData[0];
+  return user || null;
 }
 
 const user = async (
   _: null,
   args: { username: string },
   context: Context
-): Promise<User | null> => {
+): Promise<User> => {
   let user;
   if (args.username === 'me') {
     if (!context.userId) {
@@ -50,7 +48,11 @@ const user = async (
     user = usersWithData[0];
   }
 
-  return user || null;
+  if (!user) {
+    throw new UserInputError('User not found');
+  }
+
+  return user;
 }
 
 const createUser = async (
@@ -103,9 +105,38 @@ const stripePlan = async (
   };
 }
 
+const subscriptions = async (
+  parent: User,
+  _: null,
+  context: Context,
+): Promise<Promise<Subscription | null>[]> => {
+  const user = await getUserById(parent.id, context);
+
+  if (!user) {
+    throw new UserInputError('User not found');
+  }
+
+  const subscriptions = await context.db
+    .collection('subscriptions')
+    .where('userId', '==', user.id)
+    .where('deletedAt', '==', null)
+    .get();
+
+  return subscriptions.docs
+    .map(async (subDoc): Promise<Subscription | null> => {
+      let subscription = {
+        id: subDoc.id,
+        ...subDoc.data()
+      } as Subscription;
+      
+      subscription = await getSubscriptionWithStripeData(subscription, context);
+
+      return subscription;
+    });
+}
+
 export default {
   Query: {
-    me,
     user,
   },
   Mutation: {
@@ -113,5 +144,6 @@ export default {
   },
   User: {
     stripePlan,
+    subscriptions,
   }
 }
