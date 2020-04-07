@@ -78,13 +78,7 @@ const stripePlan = async (
   _: null,
   context: Context,
 ): Promise<StripePlan | null> => {
-  const stripeUser = await getUserById(parent.id, context);
-
-  if (!stripeUser) {
-    throw new UserInputError('User not found');
-  }
-
-  if (!stripeUser?.stripePlanId || !stripeUser?.stripeUserId) {
+  if (!parent?.stripePlanId || !parent?.stripeUserId) {
     return null;
   }
 
@@ -93,8 +87,8 @@ const stripePlan = async (
     typescript: true,
   });
 
-  const plan: Stripe.Plan = await stripe.plans.retrieve(stripeUser.stripePlanId, undefined, {
-    stripeAccount: stripeUser.stripeUserId || undefined,
+  const plan: Stripe.Plan = await stripe.plans.retrieve(parent.stripePlanId, undefined, {
+    stripeAccount: parent.stripeUserId || undefined,
   });
 
   return {
@@ -110,15 +104,9 @@ const subscriptions = async (
   _: null,
   context: Context,
 ): Promise<Promise<Subscription | null>[]> => {
-  const user = await getUserById(parent.id, context);
-
-  if (!user) {
-    throw new UserInputError('User not found');
-  }
-
   const subscriptions = await context.db
     .collection('subscriptions')
-    .where('userId', '==', user.id)
+    .where('userId', '==', parent.id)
     .where('deletedAt', '==', null)
     .get();
 
@@ -135,25 +123,19 @@ const subscriptions = async (
     });
 }
 
-const subscribers = async (
+export const subscribers = async (
   parent: User,
   _: null,
   context: Context,
-): Promise<Promise<string>[]> => {
-  const user = await getUserById(parent.id, context);
-
-  if (!user) {
-    throw new UserInputError('User not found');
-  }
-
+): Promise<string[]> => {
   const subscriptions = await context.db
     .collection('subscriptions')
-    .where('authorId', '==', user.id)
+    .where('authorId', '==', parent.id)
     .where('deletedAt', '==', null)
     .get();
 
   return subscriptions.docs
-    .map(async (subDoc): Promise<string> => {
+    .map((subDoc): string => {
       const subscription = {
         id: subDoc.id,
         ...subDoc.data()
@@ -161,6 +143,36 @@ const subscribers = async (
       
       return subscription.userId;
     });
+}
+
+const followers = async (
+  parent: User,
+  _: null,
+  context: Context,
+): Promise<Promise<User | null>[]> => {
+  if (!parent.followerIds) {
+    return [];
+  }
+
+  return parent.followerIds
+    .map(async (
+      follower: string | null
+    ): Promise<User | null> => await getUserById(follower || '', context));
+}
+
+const following = async (
+  parent: User,
+  _: null,
+  context: Context,
+): Promise<Promise<User | null>[]> => {
+  if (!parent.followingIds) {
+    return [];
+  }
+
+  return parent.followingIds
+    .map(async (
+      follower: string | null
+    ): Promise<User | null> => await getUserById(follower || '', context));
 }
 
 export default {
@@ -174,5 +186,7 @@ export default {
     stripePlan,
     subscriptions,
     subscribers,
+    followers,
+    following,
   }
 }
