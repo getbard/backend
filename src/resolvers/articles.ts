@@ -2,7 +2,7 @@ import { AuthenticationError, UserInputError } from 'apollo-server';
 import slugify from 'slugify';
 import cuid from 'cuid';
 
-import { getUserById } from './users';
+import { getUserById, subscribers } from './users';
 
 import { Context } from '../types';
 import {
@@ -28,8 +28,17 @@ const shouldBlockContent = async (article: Article | undefined, context: Context
   }
 
   const articleAuthor = await getUserById(article.userId, context);
-  const articleSubs = articleAuthor?.subscribers || [];
-  return article.subscribersOnly && !articleSubs.includes(context.userId) && article.userId !== context.userId;
+
+  // Something is not right if we get here
+  if (!articleAuthor) {
+    return true;
+  }
+
+  const articleSubscribers = await subscribers(articleAuthor, null, context);
+  if (article.subscribersOnly && !articleSubscribers.length) {
+    return true;
+  }
+  return article.subscribersOnly && !articleSubscribers.includes(context.userId || '') && article.userId !== context.userId;
 }
 
 const getArticleContent = (article: Article, contentBlocked: boolean): string => {

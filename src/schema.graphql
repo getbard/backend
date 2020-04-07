@@ -15,9 +15,11 @@ type Mutation {
   deleteArticle(input: DeleteArticleInput!): DeleteArticlePayload!
   createUser(input: CreateUserInput!): CreateUserPayload!
   connectStripeAccount(input: ConnectStripeAccountInput!): ConnectStripeAccountPayload!
-  createStripeSession(input: CreateStripeSessionInput): CreateStripeSessionPayload!
-  createSubscription(input: CreateSubscriptionInput): CreateSubscriptionPayload!
-  cancelSubscription(input: CancelSubscriptionInput): CancelSubscriptionPayload!
+  createStripeSession(input: CreateStripeSessionInput!): CreateStripeSessionPayload!
+  createSubscription(input: CreateSubscriptionInput!): CreateSubscriptionPayload!
+  cancelSubscription(input: CancelSubscriptionInput!): CancelSubscriptionPayload!
+  followUser(input: FollowUserInput!): FollowUserPayload!
+  unfollowUser(input: UnfollowUserInput!): UnfollowUserPayload!
 }
 
 type ArticleHeaderImage {
@@ -55,8 +57,10 @@ type User {
   username: String!
   email: String!
   profileImageURL: String
-  following: [String]
-  followers: [String]
+  following: [User]
+  followingIds: [String]
+  followers: [User]
+  followerIds: [String]
   subscribers: [String]
   subscriptions: [Subscription]
   createdAt: String!
@@ -231,4 +235,20 @@ input CancelSubscriptionInput {
 
 type CancelSubscriptionPayload {
   id: ID!
+}
+
+input FollowUserInput {
+  userId: String!
+}
+
+type FollowUserPayload {
+  userId: String!
+}
+
+input UnfollowUserInput {
+  userId: String!
+}
+
+type UnfollowUserPayload {
+  userId: String!
 }
