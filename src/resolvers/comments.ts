@@ -24,7 +24,7 @@ const commentsByResourceId = async (
     .where('resourceId','==', args.resourceId)
     .where('parentId', '==', null)
     .where('deletedAt', '==', null)
-    .orderBy('createdAt', 'desc')
+    .orderBy('createdAt', 'asc')
     .get();
 
   return comments.docs.map(comment => ({ id: comment.id, ...comment.data() })) as Comment[];
