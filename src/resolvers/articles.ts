@@ -7,10 +7,11 @@ import { getUserById, subscribers } from './users';
 import { Context } from '../types';
 import {
   Article,
+  Comment,
+  User,
   CreateOrUpdateArticleInput,
   CreateOrUpdateArticlePayload,
   PublishArticleInput,
-  User,
   DeleteArticleInput,
 } from '../generated/graphql';
 
@@ -154,6 +155,8 @@ const createOrUpdateArticle = async (
     throw new AuthenticationError('Not authenticated');
   }
 
+  // TODO: Make this query the DB and check the user
+  // instead of checking the input
   if (input.userId && context?.userId !== input.userId) {
     throw new AuthenticationError('Not authorized');
   }
@@ -274,6 +277,22 @@ const author = async (
   return await getUserById(parent.userId, context);
 }
 
+const comments = async (
+  parent: Article,
+  _: null,
+  context: Context,
+): Promise<Comment[]> => {
+  const comments = await context.db
+    .collection('comments')
+    .where('resourceId','==', parent.id)
+    .where('parentId', '==', null)
+    .where('deletedAt', '==', null)
+    .orderBy('createdAt', 'desc')
+    .get();
+
+  return comments.docs.map(comment => ({ id: comment.id, ...comment.data() })) as Comment[];
+}
+
 export default {
   Query: {
     articles,
@@ -288,5 +307,6 @@ export default {
   },
   Article: {
     author,
+    comments,
   },
 }
