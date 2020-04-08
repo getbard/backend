@@ -20,6 +20,9 @@ type Mutation {
   cancelSubscription(input: CancelSubscriptionInput!): CancelSubscriptionPayload!
   followUser(input: FollowUserInput!): FollowUserPayload!
   unfollowUser(input: UnfollowUserInput!): UnfollowUserPayload!
+  createComment(input: CreateCommentInput!): CreateCommentPayload!
+  updateComment(input: UpdateCommentInput!): UpdateCommentPayload!
+  deleteComment(input: DeleteCommentInput!): DeleteCommentPayload!
 }
 
 type ArticleHeaderImage {
@@ -79,11 +82,15 @@ type Category {
 
 type Comment {
   id: ID
+  userId: String!
   user: User!
   message: String!
+  parentId: String
   replies: [Comment]
+  likes: Int!
   createdAt: String!
   updatedAt: String!
+  deletedAt: String!
 }
 
 type UnsplashPhoto {
@@ -251,4 +258,33 @@ input UnfollowUserInput {
 
 type UnfollowUserPayload {
   userId: String!
+}
+
+input CreateCommentInput {
+  message: String!
+  parentId: String
+}
+
+type CreateCommentPayload {
+  id: ID!
+  createdAt: String!
+}
+
+input UpdateCommentInput {
+  id: ID!
+  message: String!
+}
+
+type UpdateCommentPayload {
+  id: ID!
+  updatedAt: String!
+}
+
+input DeleteCommentInput {
+  id: ID!
+}
+
+type DeleteCommentPayload {
+  id: ID!
+  deletedAt: String!
 }

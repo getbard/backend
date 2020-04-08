@@ -154,6 +154,8 @@ const createOrUpdateArticle = async (
     throw new AuthenticationError('Not authenticated');
   }
 
+  // TODO: Make this query the DB and check the user
+  // instead of checking the input
   if (input.userId && context?.userId !== input.userId) {
     throw new AuthenticationError('Not authorized');
   }
