@@ -3,6 +3,7 @@ type Query {
   article(id: ID!): Article
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!, drafts: Boolean): [Article]
+  commentsByResourceId(resourceId: ID!): [Comment]
   stripeSession(id: ID!, stripeUserId: ID!): StripeSession!
   subscription(id: ID!): Subscription!
   user(username: String!): User
@@ -84,6 +85,7 @@ type Comment {
   id: ID
   userId: String!
   user: User!
+  resourceId: String!
   message: String!
   parentId: String
   replies: [Comment]
@@ -262,11 +264,13 @@ type UnfollowUserPayload {
 
 input CreateCommentInput {
   message: String!
+  resourceId: String!
   parentId: String
 }
 
 type CreateCommentPayload {
   id: ID!
+  message: String!
   createdAt: String!
 }
 

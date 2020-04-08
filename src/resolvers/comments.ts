@@ -1,8 +1,11 @@
 import { AuthenticationError, UserInputError } from 'apollo-server';
 
+import { getUserById } from './users';
+
 import { Context } from '../types';
 import {
   Comment,
+  User,
   CreateCommentInput,
   CreateCommentPayload,
   UpdateCommentInput,
@@ -10,6 +13,22 @@ import {
   DeleteCommentInput,
   DeleteCommentPayload,
 } from '../generated/graphql';
+
+const commentsByResourceId = async (
+  _: null,
+  args: { resourceId: string },
+  context: Context,
+): Promise<Comment[]> => {
+  const comments = await context.db
+    .collection('comments')
+    .where('resourceId','==', args.resourceId)
+    .where('parentId', '==', null)
+    .where('deletedAt', '==', null)
+    .orderBy('createdAt', 'desc')
+    .get();
+
+  return comments.docs.map(comment => ({ id: comment.id, ...comment.data() })) as Comment[];
+}
 
 const createComment = async (
   _: null,
@@ -105,11 +124,40 @@ const deleteComment = async (
   return deletedComment as DeleteCommentPayload;
 }
 
+const user = async (
+  parent: Comment,
+  _: null,
+  context: Context,
+): Promise<User | null> => {
+  return await getUserById(parent.userId, context);
+}
+
+const replies = async (
+  parent: Comment,
+  _: null,
+  context: Context,
+): Promise<Comment[]> => {
+  const comments = await context.db
+    .collection('comments')
+    .where('parentId', '==', parent.id)
+    .where('deletedAt', '==', null)
+    .orderBy('createdAt', 'asc')
+    .get();
+
+  return comments.docs.map(comment => ({ id: comment.id, ...comment.data() })) as Comment[];
+}
+
 export default {
-  Query: {},
+  Query: {
+    commentsByResourceId,
+  },
   Mutation: {
     createComment,
     updateComment,
     deleteComment,
-  }
+  },
+  Comment: {
+    user,
+    replies,
+  },
 }
