@@ -58,7 +58,9 @@ const articles = async (
   context: Context
 ): Promise<Article[]> => {
   let articles;
-  const category = args.category.toLowerCase();
+  const category = args?.category
+    ? args.category.toLowerCase()
+    : 'all';
 
   if (category === 'all') {
     articles = await context.db
