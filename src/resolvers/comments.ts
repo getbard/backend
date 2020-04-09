@@ -1,5 +1,6 @@
 import { AuthenticationError, UserInputError } from 'apollo-server';
 
+import { addActivity } from '../lib/stream';
 import { getUserById } from './users';
 
 import { Context } from '../types';
@@ -56,6 +57,8 @@ const createComment = async (
 
   const commentRef = await context.db.collection('comments').add(comment);
   const commentDoc = await context.db.doc(`comments/${commentRef.id}`).get();
+
+  addActivity(context, 'comment', commentDoc.id, [`article:${input.resourceId}`]);
 
   return { id: commentDoc.id, ...commentDoc.data() } as CreateCommentPayload;
 }

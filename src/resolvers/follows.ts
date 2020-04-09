@@ -1,5 +1,6 @@
 import { AuthenticationError, UserInputError } from 'apollo-server';
 
+import { followStream, unfollowStream, addActivity } from './../lib/stream';
 import { getUserById } from './users';
 
 import { Context } from '../types';
@@ -25,6 +26,7 @@ export const followUser = async (
     throw new UserInputError('User not found');
   }
 
+  // Add followingId (person being followed) to the current user
   await context.db.doc(`users/${context.userId}`).set({
     followingIds: [
       ...user?.followingIds || [],
@@ -32,12 +34,16 @@ export const followUser = async (
     ],
   }, { merge: true });
 
+  // Add followerId (current user) to the person being followed
   await context.db.doc(`users/${userToFollow.id}`).set({
     followerIds: [
       ...userToFollow?.followerIds || [],
       context.userId
     ],
   }, { merge: true });
+
+  followStream(context, 'user', userToFollow.id);
+  addActivity(context, 'followed', userToFollow.id);
 
   return { userId: userToFollow.id };
 }
@@ -64,6 +70,8 @@ const unfollowUser = async (
   await context.db.doc(`users/${userToUnfollow.id}`).set({
     followerIds: userToUnfollow.followerIds?.filter(follower => follower !== context.userId),
   }, { merge: true });
+
+  unfollowStream(context, 'user', userToUnfollow.id);
 
   return { userId: userToUnfollow.id };
 }

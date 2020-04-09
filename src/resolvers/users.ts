@@ -70,6 +70,17 @@ const createUser = async (
   });
 
   const userDoc = await context.db.doc(`users/${input.id}`).get();
+
+  // Create a stream for the user
+  try {
+    context.stream.user(userDoc.id).create({
+      name: fullname,
+      username,
+    });
+  } catch (error) {
+    console.log('Failed to create a stream for use:', error);
+  }
+
   return { id: userDoc.id, ...userDoc.data() } as CreateUserPayload;
 }
 
