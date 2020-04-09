@@ -54,16 +54,30 @@ const getArticleContent = (article: Article, contentBlocked: boolean): string =>
 
 const articles = async (
   _: null, 
-  args: null,
+  args: { category: string },
   context: Context
 ): Promise<Article[]> => {
-  const articles = await context.db
-    .collection('articles')
-    .where('publishedAt', '>', '')
-    .where('deletedAt', '==', null)
-    .orderBy('publishedAt', 'desc')
-    .orderBy('updatedAt', 'desc')
-    .get();
+  let articles;
+  const category = args.category.toLowerCase();
+
+  if (category === 'all') {
+    articles = await context.db
+      .collection('articles')
+      .where('publishedAt', '>', '')
+      .where('deletedAt', '==', null)
+      .orderBy('publishedAt', 'desc')
+      .orderBy('updatedAt', 'desc')
+      .get();
+  } else {
+    articles = await context.db
+      .collection('articles')
+      .where('category', '==', category)
+      .where('publishedAt', '>', '')
+      .where('deletedAt', '==', null)
+      .orderBy('publishedAt', 'desc')
+      .orderBy('updatedAt', 'desc')
+      .get();
+  }
 
   return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
 };
@@ -174,6 +188,7 @@ const createOrUpdateArticle = async (
     deletedAt: null,
     subscribersOnly: false,
     wordCount: 0,
+    category: null,
   };
 
   const article: CreateOrUpdateArticleInput = {

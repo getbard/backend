@@ -1,5 +1,5 @@
 type Query {
-  articles: [Article]
+  articles(category: String): [Article]
   article(id: ID!): Article
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!, drafts: Boolean): [Article]
@@ -40,7 +40,7 @@ type Article {
   content: String
   headerImage: ArticleHeaderImage
   author: User!
-  categories: [Category]
+  category: Category
   comments: [Comment]
   likes: Int!
   wordCount: Int!
@@ -72,13 +72,6 @@ type User {
   stripeUserId: String
   stripePlanId: String
   stripePlan: StripePlan
-}
-
-type Category {
-  id: ID!
-  name: String!
-  createdAt: String!
-  updatedAt: String!
 }
 
 type Comment {
@@ -145,6 +138,22 @@ type Plan {
   interval: String!
 }
 
+enum Category {
+  arts
+  books
+  business
+  design
+  food
+  health
+  opinion
+  politics
+  science
+  sports
+  technology
+  travel
+  world
+}
+
 input ArticleHeaderImageInput {
   id: ID!
   url: String!
@@ -163,6 +172,7 @@ input CreateOrUpdateArticleInput {
   userId: String
   subscribersOnly: Boolean
   wordCount: Int
+  category: String
 }
 
 type CreateOrUpdateArticlePayload {
