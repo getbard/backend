@@ -10,7 +10,7 @@ import {
   UnfollowUserPayload,
 } from './../generated/graphql';
 
-const followUser = async (
+export const followUser = async (
   _: null,
   { input }: { input: FollowUserInput },
   context: Context
