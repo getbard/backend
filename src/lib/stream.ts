@@ -1,7 +1,6 @@
 import stream from 'getstream';
 
 import { Context } from '../types';
-import { messaging } from 'firebase-admin';
 
 let client;
 
@@ -27,7 +26,9 @@ export const followStream = (
 
   try {
     const currUserFeed = context.stream.feed('timeline', context.userId);
-    currUserFeed.follow(resourceType, resourceId);
+    // limit: 0 makes sure no feed history is copied
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    currUserFeed.follow(resourceType, resourceId, { activity_copy_limit: 0 });
   } catch (error) {
     console.error(`Failed to follow ${resourceType} feed:`, error?.detail || error, {
       resource: resourceId,
@@ -57,12 +58,19 @@ export const unfollowStream = (
   }
 }
 
-export const addActivity = (
-  context: Context,
-  verb: string,
-  object: string,
-  to?: string[],
-): void => {
+export const addActivity = ({
+  context,
+  verb,
+  objectType,
+  objectId,
+  to = [],
+}: {
+  context: Context;
+  verb: string;
+  objectType: string;
+  objectId: string;
+  to?: string[];
+}): void => {
   if (!context.userId) {
     console.error(`Failed to add activity ${verb}, user context not found`);
     return;
@@ -71,15 +79,15 @@ export const addActivity = (
   const activity = {
     actor: context.userId,
     verb,
-    object,
+    object: `${objectType}:${objectId}`,
     to: to || [],
     // eslint-disable-next-line @typescript-eslint/camelcase
-    foreign_id: `${verb}:${object}`,
+    foreign_id: `${verb}:${objectId}`,
     time: new Date().toISOString(),
   };
 
   if (verb === 'article') {
-    activity.to = [...activity.to, `${verb}:${object}`];
+    activity.to = [...activity.to, `${objectType}:${objectId}`];
   }
 
   try {

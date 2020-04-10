@@ -85,7 +85,7 @@ const articles = async (
   return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
 };
 
-const article = async (
+export const article = async (
   _: null,
   args: { id: string },
   context: Context
@@ -253,7 +253,12 @@ const publishArticle = async (
     .set(updatedArticle, { merge: true });
 
   followStream(context, 'article', article.id);
-  addActivity(context, 'article', article.id);
+  addActivity({
+    context,
+    verb: 'published',
+    objectType: 'article',
+    objectId: article.id,
+  });
 
   return updatedArticle as Article;
 }

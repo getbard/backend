@@ -43,7 +43,12 @@ export const followUser = async (
   }, { merge: true });
 
   followStream(context, 'user', userToFollow.id);
-  addActivity(context, 'followed', userToFollow.id);
+  addActivity({
+    context,
+    verb: 'followed',
+    objectType: 'follow',
+    objectId: userToFollow.id,
+  });
 
   return { userId: userToFollow.id };
 }

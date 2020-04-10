@@ -78,7 +78,7 @@ const createUser = async (
       username,
     });
   } catch (error) {
-    console.log('Failed to create a stream for use:', error);
+    console.error('Failed to create a stream for use:', error);
   }
 
   return { id: userDoc.id, ...userDoc.data() } as CreateUserPayload;

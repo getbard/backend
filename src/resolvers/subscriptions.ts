@@ -106,7 +106,12 @@ export const createSubscription = async (
   const subscriptionDoc = await context.db.doc(`subscriptions/${subscriptionRef.id}`).get();
 
   followUser(null, { input: { userId: author.id } }, context);
-  addActivity(context, 'subscription', author.id);
+  addActivity({
+    context,
+    verb: 'subscribed',
+    objectType: 'subscription',
+    objectId: author.id,
+  });
 
   return { id: subscriptionDoc.id, ...subscriptionDoc.data() } as CreateSubscriptionPayload;
 }
