@@ -8,6 +8,8 @@ import fs from 'fs';
 import db from './lib/db';
 const firebaseConfig = JSON.parse(fs.readFileSync(`${__dirname}/../firebase.json`, 'utf8'));
 
+import stream from './lib/stream';
+
 import { Context } from './types';
 
 import resolvers from './resolvers';
@@ -34,6 +36,7 @@ const server = new ApolloServer({
     return {
       db,
       userId: decodedToken?.uid || null,
+      stream,
     };
   }
 });

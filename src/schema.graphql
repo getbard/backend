@@ -4,6 +4,7 @@ type Query {
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!, drafts: Boolean): [Article]
   commentsByResourceId(resourceId: ID!): [Comment]
+  feed: Feed
   stripeSession(id: ID!, stripeUserId: ID!): StripeSession!
   subscription(id: ID!): Subscription!
   user(username: String!): User
@@ -75,10 +76,11 @@ type User {
 }
 
 type Comment {
-  id: ID
+  id: ID!
   userId: String!
   user: User!
   resourceId: String!
+  resource: Article!
   message: String!
   parentId: String
   replies: [Comment]
@@ -136,6 +138,32 @@ type Plan {
   amount: Int!
   currency: String!
   interval: String!
+}
+
+type Feed {
+  next: String!
+  results: [FeedItem]!
+  unseen: Int!
+  unread: Int!
+}
+
+type FeedItem {
+  id: ID!
+  is_read: Boolean!
+  is_seen: Boolean!
+  verb: String!
+  actor_count: Int!
+  activities: [FeedActivity]!
+}
+
+union FeedActivityObject = Article | Comment | User
+
+type FeedActivity {
+  id: ID!
+  actor: User!
+  verb: String!
+  time: String!
+  object: FeedActivityObject
 }
 
 enum Category {

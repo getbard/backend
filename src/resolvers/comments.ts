@@ -1,9 +1,12 @@
 import { AuthenticationError, UserInputError } from 'apollo-server';
 
+import { addActivity } from '../lib/stream';
 import { getUserById } from './users';
+import { article } from './articles';
 
 import { Context } from '../types';
 import {
+  Article,
   Comment,
   User,
   CreateCommentInput,
@@ -13,6 +16,20 @@ import {
   DeleteCommentInput,
   DeleteCommentPayload,
 } from '../generated/graphql';
+
+export const comment = async (
+  _: null,
+  args: { id: string },
+  context: Context,
+): Promise<Comment | null> => {
+  const commentDoc = await context.db.doc(`comments/${args.id}`).get();
+  const comment = commentDoc.data() as Comment | undefined;
+
+  return comment ? {
+    id: commentDoc.id,
+    ...comment
+  } : null;
+}
 
 const commentsByResourceId = async (
   _: null,
@@ -56,6 +73,14 @@ const createComment = async (
 
   const commentRef = await context.db.collection('comments').add(comment);
   const commentDoc = await context.db.doc(`comments/${commentRef.id}`).get();
+
+  addActivity({
+    context,
+    verb: 'commented',
+    objectType: 'comment',
+    objectId: commentDoc.id,
+    to: [`article:${input.resourceId}`],
+  });
 
   return { id: commentDoc.id, ...commentDoc.data() } as CreateCommentPayload;
 }
@@ -147,6 +172,14 @@ const replies = async (
   return comments.docs.map(comment => ({ id: comment.id, ...comment.data() })) as Comment[];
 }
 
+const resource = async (
+  parent: Comment,
+  _: null,
+  context: Context,
+): Promise<Article | null> => {
+  return  article(null, { id: parent.resourceId }, context) || null;
+}
+
 export default {
   Query: {
     commentsByResourceId,
@@ -159,5 +192,6 @@ export default {
   Comment: {
     user,
     replies,
+    resource,
   },
 }

@@ -98,7 +98,7 @@ const stripeSession = async (
         stripeSubscriptionId:  checkoutSession.subscription,
       } }, context);
     } catch (error) {
-      console.log('Failed to create a Stripe subscription:', error);
+      console.error('Failed to create a Stripe subscription:', error);
       throw new ApolloError('Failed to create a Stripe subscription');
     }
   }

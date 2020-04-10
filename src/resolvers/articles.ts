@@ -2,6 +2,7 @@ import { AuthenticationError, UserInputError } from 'apollo-server';
 import slugify from 'slugify';
 import cuid from 'cuid';
 
+import { followStream, unfollowStream, addActivity } from './../lib/stream';
 import { getUserById, subscribers } from './users';
 
 import { Context } from '../types';
@@ -84,7 +85,7 @@ const articles = async (
   return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
 };
 
-const article = async (
+export const article = async (
   _: null,
   args: { id: string },
   context: Context
@@ -251,6 +252,14 @@ const publishArticle = async (
     .doc(`articles/${article.id}`)
     .set(updatedArticle, { merge: true });
 
+  followStream(context, 'article', article.id);
+  addActivity({
+    context,
+    verb: 'published',
+    objectType: 'article',
+    objectId: article.id,
+  });
+
   return updatedArticle as Article;
 }
 
@@ -282,6 +291,8 @@ const deleteArticle = async (
   await context.db
     .doc(`articles/${article.id}`)
     .set(deleted, { merge: true });
+
+  unfollowStream(context, 'article', article.id);
 
   return deleted as Article;
 }
