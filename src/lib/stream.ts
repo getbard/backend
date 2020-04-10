@@ -28,7 +28,7 @@ export const followStream = (
     const currUserFeed = context.stream.feed('timeline', context.userId);
     // limit: 0 makes sure no feed history is copied
     // eslint-disable-next-line @typescript-eslint/camelcase
-    currUserFeed.follow(resourceType, resourceId, { limit: 0 });
+    currUserFeed.follow(resourceType, resourceId);
   } catch (error) {
     console.error(`Failed to follow ${resourceType} feed:`, error?.detail || error, {
       resource: resourceId,
