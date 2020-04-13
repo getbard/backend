@@ -5,6 +5,7 @@ type Query {
   articlesByUser(userId: ID!, drafts: Boolean): [Article]
   commentsByResourceId(resourceId: ID!): [Comment]
   feed: Feed
+  profileFeed(userId: ID): ProfileFeed
   stripeSession(id: ID!, stripeUserId: ID!): StripeSession!
   subscription(id: ID!): Subscription!
   user(username: String!): User
@@ -164,6 +165,11 @@ type FeedActivity {
   verb: String!
   time: String!
   object: FeedActivityObject
+}
+
+type ProfileFeed {
+  next: String!
+  results: [FeedActivity]!
 }
 
 enum Category {

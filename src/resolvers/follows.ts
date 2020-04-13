@@ -48,6 +48,7 @@ export const followUser = async (
     verb: 'followed',
     objectType: 'follow',
     objectId: userToFollow.id,
+    to: [`user:${userToFollow.id}`],
   });
 
   return { userId: userToFollow.id };
