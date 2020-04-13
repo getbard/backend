@@ -34,10 +34,10 @@ const unsplashPhoto = async (
   let photos;
 
   if (args.search) {
-    const searchResults = await unsplash.search.photos(args.search, 1, 15, { orientation: 'landscape' }).then(toJson);
+    const searchResults = await unsplash.search.photos(args.search, 1, 30, { orientation: 'landscape' }).then(toJson);
     photos = searchResults?.results || [];
   } else {
-    photos = await unsplash.photos.listPhotos(1, 15, 'latest').then(toJson);
+    photos = await unsplash.photos.listPhotos(1, 30, 'latest').then(toJson);
   }
 
   return photos.map(({ id, urls, user }: UnsplashPhotoObject) => ({
