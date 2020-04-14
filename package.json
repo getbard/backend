@@ -25,6 +25,7 @@
     "firebase-admin": "^8.10.0",
     "getstream": "^4.5.1",
     "graphql": "^14.6.0",
+    "imgix-core-js": "^2.3.1",
     "lodash.merge": "^4.6.2",
     "slugify": "^1.4.0",
     "stripe": "^8.38.0",
