@@ -1,6 +1,8 @@
+import { downloadUnsplashPhoto } from './unsplashPhotos';
 import { AuthenticationError, UserInputError } from 'apollo-server';
 import slugify from 'slugify';
 import cuid from 'cuid';
+import Unsplash from 'unsplash-js';
 
 import { followStream, unfollowStream, addActivity } from './../lib/stream';
 import { getUserById, subscribers } from './users';
@@ -202,14 +204,27 @@ const createOrUpdateArticle = async (
   let articleDoc;
 
   if (article.id) {
-    await context.db.doc(`articles/${article.id}`).set(article, { merge: true });
+    // Get the image before updating so we can send a download event to Unsplash
     articleDoc = await context.db.doc(`articles/${article.id}`).get();
+    const oldArticle = { ...articleDoc.data() };
+
+    // Send the download event to Unsplash
+    if (input.headerImage && oldArticle?.headerImage?.url !== input.headerImage.url) {
+      downloadUnsplashPhoto(input?.headerImage?.downloadUrl || '');
+    }
+
+    await context.db.doc(`articles/${article.id}`).set(article, { merge: true });
   } else {
+    // Send the download event to Unsplash
+    if (input.headerImage) {
+      downloadUnsplashPhoto(input.headerImage.downloadUrl);
+    }
+
     const articleRef = await context.db.collection('articles').add(article);
     articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
   }
-  
-  return { id: articleDoc.id, ...articleDoc.data() } as CreateOrUpdateArticlePayload;
+
+  return { id: articleDoc.id } as CreateOrUpdateArticlePayload;
 }
 
 const publishArticle = async (

@@ -14,12 +14,22 @@ const unsplash = new Unsplash({ accessKey: process.env.UNSPLASH_ACCESS_KEY || ''
 type UnsplashPhotoObject = {
   id: string;
   urls: { [key: string]: string };
+  links: { [key: string]: string };
   user: {
     name: string;
     links: {
       html: string;
     };
   };
+}
+
+export const downloadUnsplashPhoto = (downloadUrl: string): void => {
+  unsplash.photos.downloadPhoto({ links:
+    {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      download_location: downloadUrl || '',
+    }
+  });
 }
 
 const unsplashPhoto = async (
@@ -40,9 +50,13 @@ const unsplashPhoto = async (
     photos = await unsplash.photos.listPhotos(1, 30, 'latest').then(toJson);
   }
 
-  return photos.map(({ id, urls, user }: UnsplashPhotoObject) => ({
+  return photos.map(({ id, urls, user, links }: UnsplashPhotoObject) => ({
     id,
-    urls,
+    urls: {
+      ...urls,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      download_location: links.download_location,
+    },
     photographerName: user.name,
     photographerUrl: user.links.html,
   })) as UnsplashPhoto;
