@@ -26,6 +26,7 @@ type Mutation {
   createComment(input: CreateCommentInput!): CreateCommentPayload!
   updateComment(input: UpdateCommentInput!): UpdateCommentPayload!
   deleteComment(input: DeleteCommentInput!): DeleteCommentPayload!
+  uploadImage(input: UploadImageInput!): UploadImagePayload!
 }
 
 type ArticleHeaderImage {
@@ -335,4 +336,14 @@ input DeleteCommentInput {
 type DeleteCommentPayload {
   id: ID!
   deletedAt: String!
+}
+
+input UploadImageInput {
+  name: String!
+  type: String!
+  content: String!
+}
+
+type UploadImagePayload {
+  url: String!
 }
