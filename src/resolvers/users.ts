@@ -3,6 +3,7 @@ import cuid from 'cuid';
 import Stripe from 'stripe';
 
 import { getSubscriptionWithStripeData } from './subscriptions';
+import { sendEmail } from './email';
 
 import { Context } from '../types';
 import {
@@ -78,8 +79,28 @@ const createUser = async (
       username,
     });
   } catch (error) {
-    console.error('Failed to create a stream for use:', error);
+    console.error('Failed to create a stream for user:', error);
   }
+
+  sendEmail({
+    personalizations: [{
+      to: [{
+        name: fullname,
+        email: input.email,
+      }],
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      dynamic_template_data: {
+        name: fullname,
+      },
+    }],
+    from: {
+      name: 'Bard',
+      email: 'hello@getbard.com',
+    },
+    subject: 'Welcome to the writing revolution',
+    html: '<span></span>',
+    templateId: 'd-df2e2ff2c3354b76aa223f4c1a6e24a8',
+  });
 
   return { id: userDoc.id, ...userDoc.data() } as CreateUserPayload;
 }
