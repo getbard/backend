@@ -22,12 +22,10 @@ export const sendEmail = async ({
   const email = {
     personalizations,
     from,
-    content: [
-      {
-        type: 'text/html',
-        value: html,
-      },
-    ],
+    content: [{
+      type: 'text/html',
+      value: html,
+    }],
     subject,
     // eslint-disable-next-line @typescript-eslint/camelcase
     template_id: templateId || '',
