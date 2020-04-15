@@ -26,13 +26,9 @@ export const sendEmail = async ({
     }],
     subject,
     // eslint-disable-next-line @typescript-eslint/camelcase
-    template_id: '',
+    template_id: templateId || '',
   }
-
-  if (templateId) {
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    email.template_id = templateId;
-  }
+console.log(email);
 
   mail
     .request({

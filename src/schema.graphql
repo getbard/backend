@@ -135,6 +135,7 @@ type Subscription {
   updatedAt: String!
   deletedAt: String
   plan: Plan!
+  customerEmai: String
 }
 
 type Plan {
