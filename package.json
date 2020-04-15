@@ -23,11 +23,13 @@
     "apollo-server": "^2.11.0",
     "cuid": "^2.1.8",
     "dotenv": "^8.2.0",
+    "escape-html": "^1.0.3",
     "firebase-admin": "^8.10.0",
     "getstream": "^4.5.1",
     "graphql": "^14.6.0",
     "imgix-core-js": "^2.3.1",
     "lodash.merge": "^4.6.2",
+    "slate": "^0.57.1",
     "slugify": "^1.4.0",
     "stripe": "^8.38.0",
     "unsplash-js": "^6.0.0"
@@ -35,6 +37,7 @@
   "devDependencies": {
     "@graphql-codegen/cli": "^1.13.0",
     "@graphql-codegen/typescript": "1.13.0",
+    "@types/escape-html": "^0.0.20",
     "@types/graphql": "^14.5.0",
     "@types/lodash.merge": "^4.6.6",
     "@types/unsplash-js": "^6.0.1",

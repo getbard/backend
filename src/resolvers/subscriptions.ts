@@ -53,6 +53,29 @@ export const getSubscriptionWithStripeData = async (
   return subscription;
 }
 
+export const getSubscriptionsByAuthorId = async (
+  authorId: string,
+  context: Context,
+): Promise<Promise<Subscription | null>[]> => {
+  const subscriptions = await context.db
+    .collection('subscriptions')
+    .where('authorId', '==', authorId)
+    .where('deletedAt', '==', null)
+    .get();
+
+  return subscriptions.docs
+    .map(async (subDoc): Promise<Subscription | null> => {
+      let subscription = {
+        id: subDoc.id,
+        ...subDoc.data()
+      } as Subscription;
+      
+      subscription = await getSubscriptionWithStripeData(subscription, context);
+
+      return subscription;
+    });
+}
+
 const subscription = async (
   _: null,
   args: { id: string },

@@ -2,15 +2,18 @@ import { downloadUnsplashPhoto } from './unsplashPhotos';
 import { AuthenticationError, UserInputError } from 'apollo-server';
 import slugify from 'slugify';
 import cuid from 'cuid';
-import Unsplash from 'unsplash-js';
 
 import { followStream, unfollowStream, addActivity } from './../lib/stream';
 import { getUserById, subscribers } from './users';
+import { getSubscriptionsByAuthorId } from './subscriptions';
+import { sendEmail } from './email';
+import { serializeHtml } from '../lib/serializer';
 
 import { Context } from '../types';
 import {
   Article,
   Comment,
+  Subscription,
   User,
   CreateOrUpdateArticleInput,
   CreateOrUpdateArticlePayload,
@@ -53,6 +56,76 @@ const getArticleContent = (article: Article, contentBlocked: boolean): string =>
   }
 
   return article.content || '';
+}
+
+const sendArticleToSubscribers = async (article: Article, context: Context): Promise<void> => {
+  const author = await getUserById(article.userId, context);
+
+  if (!author) {
+    console.error(`Could not email article (${article.id}), user not found: ${article.userId}`);
+    return;
+  }
+
+  try {
+    const authorSubscriptions = await getSubscriptionsByAuthorId(author.id, context);
+    const authorName = `${author.firstName}${author?.lastName && ' ' + author.lastName}`;
+    const authorLink = `<a href="https://getbard.com/${author?.username}">${authorName}</a>`;
+    const articleLink = `If you prefer, <a href="https://getbard.com/s/${article.slug}">you can read the article on Bard's platform</a>.`;
+    const authorSupportLink = `<a href="https://getbard.com/${author?.username}?support=true">consider supporting ${authorName} on Bard</a>`;
+    const subscribeButton = `<a href="https://getbard.com/${author?.username}?support=true" style="margin: 0 auto;text-align:center;background:#004346;color:white;padding:20px;border-radius:0.125rem;">Support ${authorName} on Bard</a><br/>`;
+  
+    const personalizations = [];
+
+    for (let i = 0; i < authorSubscriptions.length; i++) {
+      const subscription = await authorSubscriptions[i] as Subscription;
+  
+      if (subscription.status === 'active') {
+        const subscriber = await getUserById(subscription.userId, context);
+        const subscriberName = `${subscriber?.firstName} ${subscriber?.lastName}`;
+  
+        personalizations.push({
+          to: [{
+            name: subscriberName,
+            email:subscriber?.email,
+          }],
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          dynamic_template_data: {
+            subject: article.title,
+            name: subscriberName,
+            authorName,
+            authorLink,
+            articleLink,
+            authorSupportLink,
+            subscribeButton,
+            article: `
+              ${article?.headerImage ? '<img style="width:100%;" src="' + article.headerImage?.url + '" />' : ''}
+              ${article?.headerImage ? '<span style="margin: 0 auto;width:100%;text-align:center;font-size:.75rem;">Photo by <a href="' + article.headerImage?.photographerUrl + '?utm_source=bard&utm_medium=referral">' + article.headerImage?.photographerName + '</a> on <a href="https://unsplash.com?utm_source=bard&utm_medium=referral">Unsplash</a></span><br/>' : ''}
+              <h1>${article.title}</h1>
+              ${article?.summary ? '<h2>' + article.summary + '</h2>' : ''}
+              ${serializeHtml({ children: JSON.parse(article.content || '[]') })}
+            `,
+          },
+        })
+      }
+    }
+
+    if (personalizations.length) {
+      sendEmail({
+        personalizations,
+        from: {
+          name: `${authorName} on Bard`,
+          email: 'noreply@getbard.com',
+        },
+        subject: article.title,
+        html: '<span></span>',
+        templateId: 'd-a4cbe9a9737f41d8b96c8853eb6d49b8',
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        asm: { group_id: 16911 },
+      });
+    }
+  } catch (error) {
+    console.error('Failed to send email to subscribers:', error);
+  }
 }
 
 const articles = async (
@@ -254,13 +327,13 @@ const publishArticle = async (
       ...article,
       ...input.article,
       updatedAt: new Date().toISOString(),
-    }
+    } as Article;
   } else {
     updatedArticle = {
       ...article,
       publishedAt: new Date().toISOString(),
       slug: createArticleSlug(article.title),
-    }
+    } as Article;
   }
 
   await context.db
@@ -275,7 +348,9 @@ const publishArticle = async (
     objectId: article.id,
   });
 
-  return updatedArticle as Article;
+  sendArticleToSubscribers(updatedArticle, context);
+
+  return updatedArticle;
 }
 
 const deleteArticle = async (
