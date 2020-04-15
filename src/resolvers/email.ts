@@ -8,27 +8,31 @@ export const sendEmail = async ({
   subject,
   html,
   templateId,
+  asm,
 }: {
   personalizations: any;
   from: { name: string; email: string };
   subject: string;
   html: string;
   templateId?: string;
+  asm?: { group_id: number };
 }): Promise<void> => {
   mail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
   const email = {
     personalizations,
     from,
-    content: [{
-      type: 'text/html',
-      value: html,
-    }],
+    content: [
+      {
+        type: 'text/html',
+        value: html,
+      },
+    ],
     subject,
     // eslint-disable-next-line @typescript-eslint/camelcase
     template_id: templateId || '',
+    asm: asm || null,
   }
-console.log(email);
 
   mail
     .request({

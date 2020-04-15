@@ -72,7 +72,7 @@ const sendArticleToSubscribers = async (article: Article, context: Context): Pro
     const authorLink = `<a href="https://getbard.com/${author?.username}">${authorName}</a>`;
     const articleLink = `If you prefer, <a href="https://getbard.com/s/${article.slug}">you can read the article on Bard's platform</a>.`;
     const authorSupportLink = `<a href="https://getbard.com/${author?.username}?support=true">consider supporting ${authorName} on Bard</a>`;
-    const subscribeButton = `<a href="https://getbard.com/${author?.username}?support=true" style="margin: 0 auto;text-align:center;background:#004346;color:white;padding:20px;border-radius:0.125rem;">Support ${authorName} on Bard</a>`;
+    const subscribeButton = `<a href="https://getbard.com/${author?.username}?support=true" style="margin: 0 auto;text-align:center;background:#004346;color:white;padding:20px;border-radius:0.125rem;">Support ${authorName} on Bard</a><br/>`;
   
     const personalizations = [];
 
@@ -108,7 +108,7 @@ const sendArticleToSubscribers = async (article: Article, context: Context): Pro
         })
       }
     }
-  
+
     if (personalizations.length) {
       sendEmail({
         personalizations,
@@ -119,6 +119,8 @@ const sendArticleToSubscribers = async (article: Article, context: Context): Pro
         subject: article.title,
         html: '<span></span>',
         templateId: 'd-a4cbe9a9737f41d8b96c8853eb6d49b8',
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        asm: { group_id: 16911 },
       });
     }
   } catch (error) {
@@ -325,13 +327,13 @@ const publishArticle = async (
       ...article,
       ...input.article,
       updatedAt: new Date().toISOString(),
-    }
+    } as Article;
   } else {
     updatedArticle = {
       ...article,
       publishedAt: new Date().toISOString(),
       slug: createArticleSlug(article.title),
-    }
+    } as Article;
   }
 
   await context.db
@@ -346,9 +348,9 @@ const publishArticle = async (
     objectId: article.id,
   });
 
-  sendArticleToSubscribers(article, context);
+  sendArticleToSubscribers(updatedArticle, context);
 
-  return updatedArticle as Article;
+  return updatedArticle;
 }
 
 const deleteArticle = async (

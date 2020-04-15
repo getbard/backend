@@ -1,6 +1,10 @@
 import escapeHtml from 'escape-html';
 import { Node, Text } from 'slate';
 
+export const serializeText = (nodes: Node[]): string => {
+  return nodes.map(n => Node.string(n)).join('\n');
+}
+
 export const serializeHtml = (node: Node): string => {
   if (Text.isText(node)) {
     if (node.bold) {
