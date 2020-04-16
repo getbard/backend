@@ -12,7 +12,7 @@
     "prestart": "yarn generate",
     "start": "ts-node src/index.ts",
     "start:watch": "tsnd --respawn src/index.ts",
-    "start:production": "node src/index.js",
+    "start:production": "NODE_ENV=production node src/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "generate": "graphql-codegen --config codegen.yaml",
     "firestore": "gcloud beta emulators firestore start --host-port localhost:8989"
