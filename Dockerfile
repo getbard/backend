@@ -4,9 +4,6 @@
 FROM node:12-alpine AS builder
 WORKDIR /build
 
-RUN apk add --no-cache curl
-RUN curl -sL https://sentry.io/get-cli/ | sh
-
 ARG RELEASE
 
 # Install dependencies
@@ -14,14 +11,15 @@ COPY . ./
 RUN yarn
 
 # Create a sentry release
-RUN sentry-cli releases new -p backend $RELEASE
-RUN sentry-cli releases set-commits --auto $RELEASE
+RUN yarn add -D @sentry/cli
+RUN ./node_modules/.bin/sentry-cli releases new -p backend $RELEASE
+RUN ./node_modules/.bin/sentry-cli releases set-commits --auto $RELEASE
 
 # Build the project
 RUN yarn build
 
-RUN sentry-cli releases files $RELEASE upload-sourcemaps --ext ts --ext map ./dist
-RUN sentry-cli releases finalize $RELEASE
+RUN ./node_modules/.bin/sentry-cli releases files $RELEASE upload-sourcemaps --ext ts --ext map ./dist
+RUN ./node_modules/.bin/sentry-cli releases finalize $RELEASE
 
 ########
 ## Run
