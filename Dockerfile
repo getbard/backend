@@ -5,25 +5,20 @@ FROM node:12-alpine AS builder
 WORKDIR /build
 
 ARG RELEASE
-ARG ENV
-
-RUN echo $ENV
 
 # Install dependencies
 COPY . ./
 RUN yarn
 
-# Create a sentry release
+# Create Sentry release
 RUN yarn add -D @sentry/cli
-RUN ./node_modules/.bin/sentry-cli releases new -p backend $RELEASE
-RUN ./node_modules/.bin/sentry-cli releases set-commits --auto $RELEASE
+RUN ./scripts/create-sentry-release.sh
 
 # Build the project
 RUN yarn build
 
-# Upload source maps to Sentry and finalize release
-RUN ./node_modules/.bin/sentry-cli releases files $RELEASE upload-sourcemaps --ext ts --ext map ./dist
-RUN ./node_modules/.bin/sentry-cli releases finalize $RELEASE
+# Upload Sentry source maps and finalize release
+RUN ./scripts/finalize-sentry-release.sh
 
 ########
 ## Run
