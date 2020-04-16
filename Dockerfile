@@ -5,6 +5,9 @@ FROM node:12-alpine AS builder
 WORKDIR /build
 
 ARG RELEASE
+ARG ENV
+
+RUN echo $ENV
 
 # Install dependencies
 COPY . ./
@@ -18,6 +21,7 @@ RUN ./node_modules/.bin/sentry-cli releases set-commits --auto $RELEASE
 # Build the project
 RUN yarn build
 
+# Upload source maps to Sentry and finalize release
 RUN ./node_modules/.bin/sentry-cli releases files $RELEASE upload-sourcemaps --ext ts --ext map ./dist
 RUN ./node_modules/.bin/sentry-cli releases finalize $RELEASE
 
