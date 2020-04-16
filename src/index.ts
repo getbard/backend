@@ -4,6 +4,7 @@ import { ApolloServer, gql } from 'apollo-server';
 import { readFileSync } from 'fs';
 import * as firebase from 'firebase-admin';
 import fs from 'fs';
+import * as Sentry from '@sentry/node';
 
 import db from './lib/db';
 const firebaseConfig = JSON.parse(fs.readFileSync(`${__dirname}/../firebase.json`, 'utf8'));
@@ -17,6 +18,11 @@ import resolvers from './resolvers';
 firebase.initializeApp({
   credential: firebase.credential.cert(firebaseConfig),
   databaseURL: process.env.FIREBASE_DB_URL,
+});
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  enabled: process.env.NODE_ENV === 'production',
 });
 
 const server = new ApolloServer({

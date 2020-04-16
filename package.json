@@ -20,6 +20,7 @@
   "dependencies": {
     "@graphql-codegen/typescript-resolvers": "^1.13.0",
     "@sendgrid/client": "^7.0.0",
+    "@sentry/node": "^5.15.4",
     "apollo-server": "^2.11.0",
     "cuid": "^2.1.8",
     "dotenv": "^8.2.0",
