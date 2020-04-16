@@ -4,7 +4,8 @@
 FROM node:12-alpine AS builder
 WORKDIR /build
 
-RUN curl -sL https://sentry.io/get-cli/ | bash
+RUN apk add --no-cache curl
+RUN curl -sL https://sentry.io/get-cli/ | sh
 
 ARG RELEASE
 
