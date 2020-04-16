@@ -85,12 +85,12 @@ const createUser = async (
   sendEmail({
     personalizations: [{
       to: [{
-        name: fullname,
+        name: `${input.firstName} ${input.lastName}`,
         email: input.email,
       }],
       // eslint-disable-next-line @typescript-eslint/camelcase
       dynamic_template_data: {
-        name: fullname,
+        name: input.firstName,
       },
     }],
     from: {
