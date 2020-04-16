@@ -13,7 +13,6 @@ steps:
     args:
         - "-c"
         - |
-            gcloud components update
             # Store the secret is a temporary file
             gcloud beta secrets versions access --secret=backend-$PROJECT_ID-firebase latest > firebase.json
   # build the container image
