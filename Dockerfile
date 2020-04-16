@@ -4,13 +4,21 @@
 FROM node:12-alpine AS builder
 WORKDIR /build
 
+ARG RELEASE
+
 # Install dependencies
-COPY package.json yarn.lock ./
+COPY . ./
 RUN yarn
 
+# Create Sentry release
+RUN yarn add -D @sentry/cli
+RUN ./scripts/create-sentry-release.sh
+
 # Build the project
-COPY . ./
 RUN yarn build
+
+# Upload Sentry source maps and finalize release
+RUN ./scripts/finalize-sentry-release.sh
 
 
 ########
@@ -19,10 +27,15 @@ RUN yarn build
 FROM node:12-alpine
 WORKDIR /usr/src/app
 
+# Set release in env
+ARG RELEASE
+ENV RELEASE=$RELEASE
+
 # Install dependencies
 COPY package.json yarn.lock ./
 RUN yarn --production
 
+# Setup env config
 COPY firebase.json firebase.json
 COPY .env .env
 
