@@ -5,7 +5,6 @@ steps:
     args:
         - "-c"
         - |
-            gcloud components update
             # Store the secret is a temporary file
             gcloud beta secrets versions access --secret=backend-$PROJECT_ID-env latest > .env
   # get the firebase.json file for the project
