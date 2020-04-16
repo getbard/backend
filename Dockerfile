@@ -20,6 +20,7 @@ RUN yarn build
 # Upload Sentry source maps and finalize release
 RUN ./scripts/finalize-sentry-release.sh
 
+
 ########
 ## Run
 ########
