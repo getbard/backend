@@ -15,7 +15,7 @@ import { Context } from './types';
 
 import resolvers from './resolvers';
 
-firebase.initializeApp({
+const fbase = firebase.initializeApp({
   credential: firebase.credential.cert(firebaseConfig),
   databaseURL: process.env.FIREBASE_DB_URL,
 });
@@ -36,7 +36,7 @@ const server = new ApolloServer({
     let decodedToken;
     if (token) {
       try {
-        decodedToken = await firebase.auth().verifyIdToken(token.split(' ')[1]);
+        decodedToken = await fbase.auth().verifyIdToken(token.split(' ')[1]);
       } catch(error) {
         console.error('Invalid token sent from client:', error);
       }
@@ -46,7 +46,7 @@ const server = new ApolloServer({
       db,
       userId: decodedToken?.uid || null,
       stream,
-      auth: firebase.auth(),
+      firebase: fbase,
     };
   }
 });

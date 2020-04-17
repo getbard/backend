@@ -247,7 +247,7 @@ const createOrUpdateArticle = async (
     throw new AuthenticationError('Not authenticated');
   }
 
-  // TODO: Make this query the DB and check the user
+  // TODO: Make this query the DB and check the article user
   // instead of checking the input
   if (input.userId && context?.userId !== input.userId) {
     throw new AuthenticationError('Not authorized');
@@ -309,7 +309,7 @@ const publishArticle = async (
     throw new AuthenticationError('Not authenticated');
   }
 
-  const firebaseUser = await context.auth.getUser(context.userId);
+  const firebaseUser = await context.firebase.auth().getUser(context.userId);
   if (!firebaseUser?.emailVerified) {
     throw new AuthenticationError('Email not verified');
   }

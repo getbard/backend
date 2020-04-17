@@ -12,6 +12,8 @@ import {
   Subscription,
   CreateUserInput,
   CreateUserPayload,
+  UpdateUserInput,
+  UpdateUserPayload,
 } from '../generated/graphql';
 
 const createUsername = (name: string): string => {
@@ -103,6 +105,38 @@ const createUser = async (
   });
 
   return { id: userDoc.id, ...userDoc.data() } as CreateUserPayload;
+}
+
+const updateUser = async (
+  _: null,
+  { input }: { input: UpdateUserInput },
+  context: Context
+): Promise<UpdateUserPayload> => {
+  if (!context.userId) {
+    throw new AuthenticationError('Not authenticated');
+  }
+
+  if (input.id && context.userId !== input.id) {
+    throw new AuthenticationError('Not authorized');
+  }
+
+  const user = await getUserById(context.userId, context);
+
+  if (user?.email !== input.email) {
+    try {
+      context.firebase.auth().updateUser(context.userId, {
+        email: input.email,
+        emailVerified: false,
+      });
+    } catch (error) {
+      console.error(`Failed to update user email for ${context.userId}:`, error);
+      throw new UserInputError('Could not update email');
+    }
+  }
+
+  await context.db.doc(`users/${context.userId}`).set({ ...input }, { merge: true });
+
+  return { id: context.userId };
 }
 
 const stripePlan = async (
@@ -213,6 +247,7 @@ export default {
   },
   Mutation: {
     createUser,
+    updateUser,
   },
   User: {
     stripePlan,
