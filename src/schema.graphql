@@ -17,6 +17,7 @@ type Mutation {
   publishArticle(input: PublishArticleInput!): PublishArticlePayload!
   deleteArticle(input: DeleteArticleInput!): DeleteArticlePayload!
   createUser(input: CreateUserInput!): CreateUserPayload!
+  updateUser(input: UpdateUserInput!): UpdateUserPayload!
   connectStripeAccount(input: ConnectStripeAccountInput!): ConnectStripeAccountPayload!
   createStripeSession(input: CreateStripeSessionInput!): CreateStripeSessionPayload!
   createSubscription(input: CreateSubscriptionInput!): CreateSubscriptionPayload!
@@ -350,4 +351,16 @@ input UploadImageInput {
 
 type UploadImagePayload {
   url: String!
+}
+
+input UpdateUserInput {
+  id: ID!
+  firstName: String!
+  lastName: String
+  username: String!
+  email: String!
+}
+
+type UpdateUserPayload {
+  id: ID!
 }
