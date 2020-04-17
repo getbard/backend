@@ -309,6 +309,11 @@ const publishArticle = async (
     throw new AuthenticationError('Not authenticated');
   }
 
+  const firebaseUser = await context.auth.getUser(context.userId);
+  if (!firebaseUser?.emailVerified) {
+    throw new AuthenticationError('Email not verified');
+  }
+
   const articleDoc = await context.db.doc(`articles/${input.id}`).get();
   const article = { id: articleDoc.id, ...articleDoc.data() } as Article;
 

@@ -29,7 +29,8 @@ export const sendEmail = async ({
     subject,
     // eslint-disable-next-line @typescript-eslint/camelcase
     template_id: templateId || '',
-    asm: asm || null,
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    asm: asm || { group_id: 16922 },
   }
 
   mail

@@ -32,6 +32,7 @@ const server = new ApolloServer({
   resolvers,
   context: async ({ req }): Promise<Context> => {
     const token = req.headers.authorization || '';
+
     let decodedToken;
     if (token) {
       try {
@@ -45,6 +46,7 @@ const server = new ApolloServer({
       db,
       userId: decodedToken?.uid || null,
       stream,
+      auth: firebase.auth(),
     };
   }
 });
