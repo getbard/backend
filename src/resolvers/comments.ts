@@ -1,6 +1,7 @@
 import { AuthenticationError, UserInputError } from 'apollo-server';
 
 import { addActivity } from '../lib/stream';
+import { lineBreakEliminator } from '../lib/slate';
 import { getUserById } from './users';
 import { article } from './articles';
 
@@ -71,6 +72,12 @@ const createComment = async (
     ...input,
   }
 
+  if (!comment.message) {
+    throw new UserInputError('Comment must have message');
+  }
+
+  comment.message = JSON.stringify(lineBreakEliminator(JSON.parse(comment.message!)));
+
   const commentRef = await context.db.collection('comments').add(comment);
   const commentDoc = await context.db.doc(`comments/${commentRef.id}`).get();
 
@@ -111,6 +118,12 @@ const updateComment = async (
     ...input,
     updatedAt: new Date().toISOString(),
   };
+
+  if (!updatedComment.message) {
+    throw new UserInputError('Comment must have message');
+  }
+
+  updatedComment.message = JSON.stringify(lineBreakEliminator(JSON.parse(updatedComment.message!)));
 
   await context.db.doc(`comments/${updatedComment.id}`).set(updatedComment, { merge: true });
 
