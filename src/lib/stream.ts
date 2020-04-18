@@ -86,15 +86,35 @@ export const addActivity = ({
     time: new Date().toISOString(),
   };
 
-  if (verb === 'article') {
-    activity.to = [...activity.to, `${objectType}:${objectId}`];
-  }
-
   try {
     const currUserFeed = context.stream.feed('user', context.userId);
     currUserFeed.addActivity(activity);
   } catch (error) {
     console.error(`Failed to add activity ${verb} feed:`, error?.detail || error, activity);
+  }
+}
+
+export const removeActivity = ({
+  context,
+  verb,
+  objectId,
+}: {
+  context: Context;
+  verb: string;
+  objectId: string;
+}): void => {
+  if (!context.userId) {
+    console.error(`Failed to add activity ${verb}, user context not found`);
+    return;
+  }
+
+  const foreignId = `${verb}:${objectId}`;
+
+  try {
+    const currUserFeed = context.stream.feed('user', context.userId);
+    currUserFeed.removeActivity({ foreignId });
+  } catch (error) {
+    console.error(`Failed to add activity ${verb} feed:`, error?.detail || error, foreignId);
   }
 }
 

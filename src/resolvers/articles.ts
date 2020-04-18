@@ -3,7 +3,7 @@ import { AuthenticationError, UserInputError } from 'apollo-server';
 import slugify from 'slugify';
 import cuid from 'cuid';
 
-import { followStream, unfollowStream, addActivity } from './../lib/stream';
+import { followStream, unfollowStream, addActivity, removeActivity } from './../lib/stream';
 import { getUserById, subscribers } from './users';
 import { getSubscriptionsByAuthorId } from './subscriptions';
 import { sendEmail } from './email';
@@ -365,13 +365,17 @@ const publishArticle = async (
     .doc(`articles/${article.id}`)
     .set(updatedArticle, { merge: true });
 
-  followStream(context, 'article', article.id);
-  addActivity({
-    context,
-    verb: 'published',
-    objectType: 'article',
-    objectId: article.id,
-  });
+  // Only call stream on first publish
+  if (!article.publishedAt) {
+    followStream(context, 'article', article.id);
+
+    addActivity({
+      context,
+      verb: 'published',
+      objectType: 'article',
+      objectId: article.id,
+    });
+  }
 
   sendArticleToSubscribers(updatedArticle, context);
 
@@ -407,7 +411,16 @@ const deleteArticle = async (
     .doc(`articles/${article.id}`)
     .set(deleted, { merge: true });
 
-  unfollowStream(context, 'article', article.id);
+    
+  if (article.publishedAt) {
+    unfollowStream(context, 'article', article.id);
+
+    removeActivity({
+      context,
+      verb: 'published',
+      objectId: article.id,
+    });
+  }
 
   return deleted as Article;
 }
