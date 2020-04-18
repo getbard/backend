@@ -7,7 +7,7 @@ import { followStream, unfollowStream, addActivity, removeActivity } from './../
 import { getUserById, subscribers } from './users';
 import { getSubscriptionsByAuthorId } from './subscriptions';
 import { sendEmail } from './email';
-import { serializeHtml } from '../lib/serializer';
+import { serializeHtml, lineBreakEliminator } from '../lib/slate';
 
 import { Context } from '../types';
 import {
@@ -339,6 +339,10 @@ const publishArticle = async (
     throw new UserInputError('Article must have a title');
   }
 
+  if (!article.content || (input.article && !input.article.content)) {
+    throw new UserInputError('Article must have content');
+  }
+
   if (article.publishedAt) {
     updatedArticle = {
       ...article,
@@ -360,6 +364,11 @@ const publishArticle = async (
   if (updatedArticle.summary && updatedArticle.summary.length > 200) {
     updatedArticle.summary = updatedArticle.summary.substring(0, 200);
   }
+
+  // The article has content because it is checked above
+  // Eliminate all consecutive line breaks so we don't have
+  // crappy looking content
+  updatedArticle.content = JSON.stringify(lineBreakEliminator(JSON.parse(updatedArticle.content!)));
 
   await context.db
     .doc(`articles/${article.id}`)
