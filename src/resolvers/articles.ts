@@ -276,6 +276,14 @@ const createOrUpdateArticle = async (
   };
   let articleDoc;
 
+  if (article.title && article.title.length > 80) {
+    article.title = article.title.substring(0, 80);  
+  }
+
+  if (article.summary && article.summary.length > 280) {
+    article.summary = article.summary.substring(0, 280);
+  }
+
   if (article.id) {
     // Get the image before updating so we can send a download event to Unsplash
     articleDoc = await context.db.doc(`articles/${article.id}`).get();
@@ -327,6 +335,10 @@ const publishArticle = async (
 
   let updatedArticle;
 
+  if (!article.title || (input.article && !input.article.title)) {
+    throw new UserInputError('Article must have a title');
+  }
+
   if (article.publishedAt) {
     updatedArticle = {
       ...article,
@@ -339,6 +351,14 @@ const publishArticle = async (
       publishedAt: new Date().toISOString(),
       slug: createArticleSlug(article.title),
     } as Article;
+  }
+
+  if (updatedArticle.title.length > 80) {
+    updatedArticle.title = updatedArticle.title.substring(0, 80);  
+  }
+
+  if (updatedArticle.summary && updatedArticle.summary.length > 200) {
+    updatedArticle.summary = updatedArticle.summary.substring(0, 200);
   }
 
   await context.db
