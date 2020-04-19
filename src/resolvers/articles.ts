@@ -169,12 +169,16 @@ export const article = async (
   const article = articleDoc.data() as Article | undefined;
   const contentBlocked = await shouldBlockContent(article, context);
 
-  return article ? {
+  if (!article) {
+    throw new UserInputError('Article not found');
+  }
+
+  return {
     id: articleDoc.id,
     ...article,
     content: getArticleContent(article, contentBlocked),
     contentBlocked,
-  } : null;
+  };
 }
 
 const articleBySlug = async (
@@ -187,15 +191,23 @@ const articleBySlug = async (
     .where('deletedAt', '==', null)
     .where('slug', '==', args.slug)
     .get();
-  const article = articles.docs[0].data() as Article | undefined;
+
+  const articleDoc = articles.docs[0];
+  
+  if (!articleDoc) {
+    throw new UserInputError('Article not found');
+  }
+
+  const article = articles.docs[0].data() as Article;
+
   const contentBlocked = await shouldBlockContent(article, context);
 
-  return article ? {
-    id: articles.docs[0].id,
+  return {
+    id: articleDoc.id,
     ...article,
     content: getArticleContent(article, contentBlocked),
     contentBlocked,
-  } : null;
+  };
 }
 
 const articlesByUser = async (
