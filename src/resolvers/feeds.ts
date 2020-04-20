@@ -76,7 +76,7 @@ const feed = async (
   // Filter out any results that got nulled
   feed.results = feed.results.filter(Boolean);
 
-  if (!feed || !feed.results.length) {
+  if (!feed || !feed?.results?.length) {
     return {
       next: '',
       results: [],
