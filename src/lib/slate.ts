@@ -48,14 +48,18 @@ export const serializeHtml = (node: Node): string => {
   }
 }
 
-const nodeIsEmpty = (node: Node): boolean => {
-  return !node?.children?.length || (node?.children?.length === 1 && Text.isText(node.children[0]) && node.children[0].text === '');
+const isEmptyParagraph = (node: Node): boolean => {
+  if (node.type !== 'paragraph') {
+    return false;
+  }
+
+  return node?.children.length === 1 && !node?.children[0]?.text.trim();
 }
 
 // We want to eliminate consecutive line breaks from our contet
 export const lineBreakEliminator = (nodes: Node[]): Node[] => {
-  if (!nodes) {
-    return [];
+  if (Text.isText(nodes)) {
+    return nodes;
   }
 
   const nodesToRemove: number[] = [];
@@ -68,9 +72,11 @@ export const lineBreakEliminator = (nodes: Node[]): Node[] => {
       continue;
     }
 
-    currNode.children = lineBreakEliminator(currNode.children);
+    if (currNode.children) {
+      currNode.children = lineBreakEliminator(currNode.children);
+    }
 
-    if (nodeIsEmpty(prevNode) && nodeIsEmpty(currNode)) {
+    if (isEmptyParagraph(prevNode) && isEmptyParagraph(currNode)) {
       nodesToRemove.push(i);
     }
   }
