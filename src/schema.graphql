@@ -46,7 +46,7 @@ type Article {
   content: String
   headerImage: ArticleHeaderImage
   author: User!
-  category: Category
+  category: String
   comments: [Comment]
   likes: Int!
   wordCount: Int!
@@ -182,16 +182,15 @@ enum Category {
   arts
   books
   business
-  design
-  food
   health
   opinion
   politics
+  psychology
+  relationships
   science
-  sports
+  self
   technology
   travel
-  world
 }
 
 enum AuthLink {
