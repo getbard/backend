@@ -84,7 +84,7 @@ const createUser = async (
     console.error('Failed to create a stream for user:', error);
   }
 
-  const emailLink = await context.firebase.auth().generatePasswordResetLink(input.email);
+  const emailLink = await context.firebase.auth().generateEmailVerificationLink(input.email);
   sendEmail({
     personalizations: [{
       to: [{

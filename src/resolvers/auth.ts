@@ -1,6 +1,5 @@
-import { AuthenticationError, UserInputError, ApolloError } from 'apollo-server';
+import { ApolloError } from 'apollo-server';
 
-import { getUserById } from './users';
 import { sendEmail } from './email';
 
 import { Context } from '../types';
