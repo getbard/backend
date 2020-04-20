@@ -48,40 +48,16 @@ export const serializeHtml = (node: Node): string => {
   }
 }
 
-const removeConsecutiveLineBreaks = (node: Node): Node => {
-  if (Text.isText(node)) {
-    return node;
-  }
-
-  const nodesToRemove: number[] = [];
-
-  for (let i = 0; i < node.children.length; i++) {
-    const currNode = node.children[i];
-    const prevNode = node.children[i - 1];
-
-    if (!prevNode) {
-      continue;
-    }
-
-    const bothTextNodes = Text.isText(prevNode) && Text.isText(currNode);
-    const bothEmptyTextNodes = bothTextNodes && prevNode.text.trim() === '' && currNode.text.trim() === '';
-
-    if (bothEmptyTextNodes) {
-      nodesToRemove.push(i);
-    }
-  }
-
-  node.children = node.children.filter((node: Node, index: number) => !nodesToRemove.includes(index));
-
-  return node;
-}
-
 const nodeIsEmpty = (node: Node): boolean => {
-  return !node.children.length || (node.children.length === 1 && Text.isText(node.children[0]) && node.children[0].text === '');
+  return !node?.children?.length || (node?.children?.length === 1 && Text.isText(node.children[0]) && node.children[0].text === '');
 }
 
 // We want to eliminate consecutive line breaks from our contet
 export const lineBreakEliminator = (nodes: Node[]): Node[] => {
+  if (!nodes) {
+    return [];
+  }
+
   const nodesToRemove: number[] = [];
 
   for (let i = 0; i < nodes.length; i++) {

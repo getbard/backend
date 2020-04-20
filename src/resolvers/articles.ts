@@ -396,9 +396,9 @@ const publishArticle = async (
       objectType: 'article',
       objectId: article.id,
     });
-  }
 
-  sendArticleToSubscribers(updatedArticle, context);
+    sendArticleToSubscribers(updatedArticle, context);
+  }
 
   return updatedArticle;
 }
