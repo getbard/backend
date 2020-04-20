@@ -123,7 +123,8 @@ const updateComment = async (
     throw new UserInputError('Comment must have message');
   }
 
-  updatedComment.message = JSON.stringify(lineBreakEliminator(JSON.parse(updatedComment.message!)));
+  // TODO: Fix this so it aint broke
+  // updatedComment.message = JSON.stringify(lineBreakEliminator(JSON.parse(updatedComment.message!)));
 
   await context.db.doc(`comments/${updatedComment.id}`).set(updatedComment, { merge: true });
 
