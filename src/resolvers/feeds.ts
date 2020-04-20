@@ -76,6 +76,15 @@ const feed = async (
   // Filter out any results that got nulled
   feed.results = feed.results.filter(Boolean);
 
+  if (!feed || !feed.results.length) {
+    return {
+      next: '',
+      results: [],
+      unseen: 0,
+      unread: 0,
+    } as Feed;
+  }
+
   return feed as Feed;
 }
 
