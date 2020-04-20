@@ -84,6 +84,7 @@ const createUser = async (
     console.error('Failed to create a stream for user:', error);
   }
 
+  const emailLink = await context.firebase.auth().generateEmailVerificationLink(input.email);
   sendEmail({
     personalizations: [{
       to: [{
@@ -93,13 +94,14 @@ const createUser = async (
       // eslint-disable-next-line @typescript-eslint/camelcase
       dynamic_template_data: {
         name: input.firstName,
+        emailLink,
       },
     }],
     from: {
       name: 'Bard',
       email: 'hello@getbard.com',
     },
-    subject: 'Welcome to the writing revolution',
+    subject: 'Welcome to Bard (verify your email)',
     html: '<span></span>',
     templateId: 'd-df2e2ff2c3354b76aa223f4c1a6e24a8',
   });

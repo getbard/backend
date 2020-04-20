@@ -3,6 +3,7 @@ type Query {
   article(id: ID!): Article
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!, drafts: Boolean): [Article]
+  authLink(type: AuthLink!, email: String!): String
   commentsByResourceId(resourceId: ID!): [Comment]
   feed: Feed
   profileFeed(userId: ID): ProfileFeed
@@ -191,6 +192,11 @@ enum Category {
   technology
   travel
   world
+}
+
+enum AuthLink {
+  passwordReset
+  emailVerification
 }
 
 input ArticleHeaderImageInput {

@@ -2,6 +2,7 @@ import { IResolvers, ResolversObject } from '../generated/graphql';
 import merge from 'lodash.merge';
 
 import articles from './articles';
+import auth from './auth';
 import comments from './comments';
 import feeds from './feeds';
 import follows from './follows';
@@ -13,6 +14,7 @@ import unsplashPhotos from './unsplashPhotos';
 
 const resolvers: IResolvers = merge(
   articles,
+  auth,
   comments,
   feeds,
   follows,
