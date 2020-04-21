@@ -7,7 +7,7 @@ type Query {
   commentsByResourceId(resourceId: ID!): [Comment]
   feed: Feed
   profileFeed(userId: ID): ProfileFeed
-  stripeSession(id: ID!, stripeUserId: ID!): StripeSession!
+  stripeSession(id: ID!, stripeUserId: ID!, authorId: ID!): StripeSession!
   subscription(id: ID!): Subscription!
   user(username: String!): User
   unsplashPhoto(search: String): [UnsplashPhoto]
@@ -275,6 +275,7 @@ input CreateStripeSessionInput {
   plan: StripePlanInput
   redirectUrl: String!
   stripeUserId: String!
+  authorId: String!
 }
 
 type CreateStripeSessionPayload {

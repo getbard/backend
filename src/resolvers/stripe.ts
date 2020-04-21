@@ -71,7 +71,7 @@ const createDefaultStripePlan = async ({ userId, stripeUserId, context }: {
 
 const stripeSession = async (
   _: null,
-  args: { id: string; stripeUserId: string },
+  args: { id: string; stripeUserId: string; authorId: string },
   context: Context,
 ): Promise<StripeSession> => {
   if (!context.userId) {
@@ -92,6 +92,7 @@ const stripeSession = async (
   if (checkoutSession.mode === 'subscription' && checkoutSession?.subscription) {
     try {
       await createSubscription(null, { input: {
+        authorId: args.authorId,
         stripeUserId: args.stripeUserId,
         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore
