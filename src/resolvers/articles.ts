@@ -34,6 +34,11 @@ const shouldBlockContent = async (article: Article | undefined, context: Context
     return true;
   }
 
+  // Authors can already read their own article
+  if (article.userId === context.userId) {
+    return false;
+  }
+
   const articleAuthor = await getUserById(article.userId, context);
 
   // Something is not right if we get here
@@ -45,7 +50,7 @@ const shouldBlockContent = async (article: Article | undefined, context: Context
   if (article.subscribersOnly && !articleSubscribers.length) {
     return true;
   }
-  return article.subscribersOnly && !articleSubscribers.includes(context.userId || '') && article.userId !== context.userId;
+  return article.subscribersOnly && !articleSubscribers.includes(context.userId || '');
 }
 
 const getArticleContent = (article: Article, contentBlocked: boolean): string => {
