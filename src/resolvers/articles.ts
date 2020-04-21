@@ -380,8 +380,7 @@ const publishArticle = async (
   // The article has content because it is checked above
   // Eliminate all consecutive line breaks so we don't have
   // crappy looking content
-  // TODO: Fix this so it isn't broke
-  // updatedArticle.content = JSON.stringify(lineBreakEliminator(JSON.parse(updatedArticle.content!)));
+  updatedArticle.content = JSON.stringify(lineBreakEliminator(JSON.parse(updatedArticle.content!)));
 
   await context.db
     .doc(`articles/${article.id}`)
