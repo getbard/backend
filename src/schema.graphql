@@ -182,8 +182,10 @@ enum Category {
   arts
   books
   business
+  fiction
   health
   opinion
+  philosophy
   politics
   psychology
   relationships
