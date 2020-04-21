@@ -2,7 +2,7 @@ import { AuthenticationError, ApolloError, UserInputError } from 'apollo-server'
 import Stripe from 'stripe';
 
 import { addActivity } from '../lib/stream';
-import { getUserByStripeId, getUserById } from './users';
+import { getUserById } from './users';
 import { followUser } from './follows';
 
 import { Context } from '../types';
@@ -99,9 +99,14 @@ export const createSubscription = async (
     throw new AuthenticationError('Not authenticated');
   }
 
-  const author = await getUserByStripeId(input.stripeUserId, context);
+  const author = await getUserById(input.authorId, context);
   if (!author) {
-    console.error('Failed to create a Stripe subscription, user not found with Stripe ID:', input.stripeUserId);
+    console.error('Failed to create a Stripe subscription, user not found with ID:', input.authorId);
+    throw new ApolloError('Could not find Stripe account for user');
+  }
+
+  if (author.stripeUserId !== input.stripeUserId) {
+    console.error('Failed to create a Stripe subscription, mismatched user:', author.id, input.stripeUserId);
     throw new ApolloError('Could not find Stripe account for user');
   }
 

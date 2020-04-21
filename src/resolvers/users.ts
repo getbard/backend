@@ -184,7 +184,7 @@ const subscriptions = async (
         id: subDoc.id,
         ...subDoc.data()
       } as Subscription;
-      
+  
       subscription = await getSubscriptionWithStripeData(subscription, context);
 
       return subscription;
@@ -208,7 +208,7 @@ export const subscribers = async (
         id: subDoc.id,
         ...subDoc.data()
       } as Subscription;
-      
+     
       return subscription.userId;
     });
 }
