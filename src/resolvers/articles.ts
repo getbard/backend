@@ -199,8 +199,11 @@ const articles = async (
       .limit(12)
       .get();
   } else {
-    articlesWithHeader = await articlesWithHeader.limit(12).get();
     articlesWithoutHeader = await articlesWithoutHeader.limit(12).get();
+
+    articlesWithHeader = await articlesWithHeader
+      .limit(articlesWithoutHeader.docs.length <= 6 ? 14 : 12)
+      .get();
   }
 
   const articlesWithHeaderData = articlesWithHeader.docs.map(article => ({
