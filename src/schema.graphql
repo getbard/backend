@@ -1,5 +1,5 @@
 type Query {
-  articles(category: String): [Article]
+  articles(category: String, headerCursor: String, headlessCursor: String): ArticlesPayload
   article(id: ID!): Article
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!, drafts: Boolean): [Article]
@@ -29,6 +29,13 @@ type Mutation {
   updateComment(input: UpdateCommentInput!): UpdateCommentPayload!
   deleteComment(input: DeleteCommentInput!): DeleteCommentPayload!
   uploadImage(input: UploadImageInput!): UploadImagePayload!
+}
+
+type ArticlesPayload {
+  articlesWithHeader: [Article],
+  articlesWithoutHeader: [Article],
+  headerCursor: String
+  headlessCursor: String
 }
 
 type ArticleHeaderImage {

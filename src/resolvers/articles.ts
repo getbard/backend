@@ -12,6 +12,7 @@ import { serializeHtml, lineBreakEliminator } from '../lib/slate';
 import { Context } from '../types';
 import {
   Article,
+  ArticlesPayload,
   Comment,
   Subscription,
   User,
@@ -135,34 +136,93 @@ const sendArticleToSubscribers = async (article: Article, context: Context): Pro
 
 const articles = async (
   _: null, 
-  args: { category: string },
+  args: {
+    category: string;
+    headerCursor: string;
+    headlessCursor: string;
+  },
   context: Context
-): Promise<Article[]> => {
-  let articles;
+): Promise<ArticlesPayload> => {
+  let articlesWithHeader;
+  let articlesWithoutHeader;
   const category = args?.category
     ? args.category.toLowerCase()
     : 'all';
 
   if (category === 'all') {
-    articles = await context.db
+    articlesWithHeader = await context.db
       .collection('articles')
       .where('publishedAt', '>', '')
       .where('deletedAt', '==', null)
       .orderBy('publishedAt', 'desc')
+      .orderBy('headerImage.id')
       .orderBy('updatedAt', 'desc')
-      .get();
+
+    articlesWithoutHeader = await context.db
+      .collection('articles')
+      .where('publishedAt', '>', '')
+      .where('deletedAt', '==', null)
+      .where('headerImage', '==', null)
+      .orderBy('publishedAt', 'desc')
+      .orderBy('updatedAt', 'desc')
   } else {
-    articles = await context.db
+    articlesWithHeader = await context.db
       .collection('articles')
       .where('category', '==', category)
       .where('publishedAt', '>', '')
       .where('deletedAt', '==', null)
       .orderBy('publishedAt', 'desc')
+      .orderBy('headerImage.id')
       .orderBy('updatedAt', 'desc')
-      .get();
+
+    articlesWithoutHeader = await context.db
+      .collection('articles')
+      .where('category', '==', category)
+      .where('publishedAt', '>', '')
+      .where('deletedAt', '==', null)
+      .where('headerImage', '==', null)
+      .orderBy('publishedAt', 'desc')
+      .orderBy('updatedAt', 'desc')
   }
 
-  return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
+  if (args?.headerCursor && args?.headlessCursor) {
+    const lastHeaderArticle = await context.db.doc(`articles/${args.headerCursor}`).get();
+    const lastHeadlessArticle = await context.db.doc(`articles/${args.headlessCursor}`).get();
+
+    articlesWithoutHeader = await articlesWithoutHeader
+      .startAfter(lastHeadlessArticle)
+      .limit(12)
+      .get();
+
+    articlesWithHeader = await articlesWithHeader
+      .startAfter(lastHeaderArticle)
+      .limit(12)
+      .get();
+  } else {
+    articlesWithHeader = await articlesWithHeader.limit(12).get();
+    articlesWithoutHeader = await articlesWithoutHeader.limit(12).get();
+  }
+
+  const articlesWithHeaderData = articlesWithHeader.docs.map(article => ({
+    id: article.id,
+    ...article.data(),
+  })) as Article[];
+
+  const articlesWithoutHeaderData = articlesWithoutHeader.docs.map(article => ({
+    id: article.id,
+    ...article.data(),
+  })) as Article[];
+
+  return {
+    articlesWithHeader: articlesWithHeaderData,
+    articlesWithoutHeader: articlesWithoutHeaderData,
+    headerCursor: articlesWithHeaderData.length
+      ? articlesWithHeaderData[articlesWithHeaderData.length - 1].id
+      : null,
+    headlessCursor: articlesWithoutHeaderData.length
+      ? articlesWithoutHeaderData[articlesWithoutHeaderData.length - 1].id
+      : null,
+  };
 };
 
 export const article = async (
