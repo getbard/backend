@@ -7,6 +7,7 @@ import comments from './comments';
 import feeds from './feeds';
 import follows from './follows';
 import images from './images';
+import profileSections from './profileSections';
 import stripe from './stripe';
 import subscriptions from './subscriptions';
 import users from './users';
@@ -19,6 +20,7 @@ const resolvers: IResolvers = merge(
   feeds,
   follows,
   images,
+  profileSections,
   stripe,
   subscriptions,
   users,
