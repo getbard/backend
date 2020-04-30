@@ -10,6 +10,7 @@ import {
   User,
   StripePlan,
   Subscription,
+  ProfileSection,
   CreateUserInput,
   CreateUserPayload,
   UpdateUserInput,
@@ -243,6 +244,25 @@ const following = async (
     ): Promise<User | null> => await getUserById(follower || '', context));
 }
 
+const profileSections = async (
+  parent: User,
+  _: null,
+  context: Context,
+): Promise<ProfileSection[]> => {
+  const profileSections = await context.db
+    .collection('sections')
+    .where('userId', '==', parent.id)
+    .where('deletedAt', '==', null)
+    .orderBy('title', 'asc')
+    .get();
+
+  return profileSections.docs
+    .map((sectionDoc): ProfileSection => ({
+      id: sectionDoc.id,
+      ...sectionDoc.data()
+    } as ProfileSection));
+}
+
 export default {
   Query: {
     user,
@@ -257,5 +277,6 @@ export default {
     subscribers,
     followers,
     following,
+    profileSections,
   }
 }

@@ -8,6 +8,8 @@ type Query {
   feed: Feed
   profileFeed(userId: ID): ProfileFeed
   stripeSession(id: ID!, stripeUserId: ID!, authorId: ID!): StripeSession!
+  profileSection(id: ID!): ProfileSection
+  profileSections(userId: ID!): [ProfileSection]
   subscription(id: ID!): Subscription!
   user(username: String!): User
   unsplashPhoto(search: String): [UnsplashPhoto]
@@ -29,6 +31,9 @@ type Mutation {
   updateComment(input: UpdateCommentInput!): UpdateCommentPayload!
   deleteComment(input: DeleteCommentInput!): DeleteCommentPayload!
   uploadImage(input: UploadImageInput!): UploadImagePayload!
+  createProfileSection(input: CreateProfileSectionInput!): CreateProfileSectionPayload!
+  updateProfileSection(input: UpdateProfileSectionInput!): UpdateProfileSectionPayload!
+  deleteProfileSection(input: DeleteProfileSectionInput!): DeleteProfileSectionPayload!
 }
 
 type ArticlesPayload {
@@ -67,6 +72,17 @@ type Article {
   contentBlocked: Boolean
 }
 
+type ProfileSection {
+  id: ID!
+  title: String!
+  content: String
+  headerImage: ArticleHeaderImage
+  createdAt: String!
+  updatedAt: String!
+  deletedAt: String
+  userId: String!
+}
+
 type User {
   id: ID!
   firstName: String!
@@ -85,6 +101,7 @@ type User {
   stripeUserId: String
   stripePlanId: String
   stripePlan: StripePlan
+  profileSections: [ProfileSection]
 }
 
 type Comment {
@@ -378,4 +395,34 @@ input UpdateUserInput {
 
 type UpdateUserPayload {
   id: ID!
+}
+
+input CreateProfileSectionInput {
+  title: String!
+  content: String!
+  headerImage: ArticleHeaderImageInput
+}
+
+type CreateProfileSectionPayload {
+  id: ID!
+}
+
+input UpdateProfileSectionInput {
+  id: ID!
+  title: String!
+  content: String!
+  headerImage: ArticleHeaderImageInput
+}
+
+type UpdateProfileSectionPayload {
+  id: ID!
+}
+
+input DeleteProfileSectionInput {
+  id: ID!
+}
+
+type DeleteProfileSectionPayload {
+  id: ID!
+  deletedAt: String!
 }
