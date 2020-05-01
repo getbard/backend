@@ -48,7 +48,7 @@ export const serializeHtml = (node: Node): string => {
   }
 }
 
-const isEmptyParagraph = (node: Node): boolean => {
+export const isEmptyParagraph = (node: Node): boolean => {
   if (node.type !== 'paragraph') {
     return false;
   }

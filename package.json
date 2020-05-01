@@ -15,7 +15,9 @@
     "start:production": "NODE_ENV=production node src/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "generate": "graphql-codegen --config codegen.yaml",
-    "firestore": "gcloud beta emulators firestore start --host-port localhost:8989"
+    "firestore": "gcloud beta emulators firestore start --host-port localhost:8989",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@graphql-codegen/typescript-resolvers": "^1.13.0",
@@ -36,16 +38,21 @@
     "unsplash-js": "^6.0.0"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.9.0",
     "@graphql-codegen/cli": "^1.13.0",
     "@graphql-codegen/typescript": "1.13.0",
     "@types/escape-html": "^0.0.20",
     "@types/graphql": "^14.5.0",
+    "@types/jest": "^25.2.1",
     "@types/lodash.merge": "^4.6.6",
     "@types/unsplash-js": "^6.0.1",
     "@typescript-eslint/eslint-plugin": "^2.23.0",
     "@typescript-eslint/parser": "^2.23.0",
+    "babel-jest": "^25.5.1",
     "concurrently": "^5.1.0",
     "eslint": "^6.8.0",
+    "jest": "^25.5.3",
+    "ts-jest": "^25.4.0",
     "ts-node": "^8.6.2",
     "ts-node-dev": "^1.0.0-pre.44",
     "typescript": "^3.8.3"
