@@ -370,14 +370,14 @@ const createOrUpdateArticle = async (
     const oldArticle = { ...articleDoc.data() };
 
     // Send the download event to Unsplash
-    if (input.headerImage && oldArticle?.headerImage?.url !== input.headerImage.url) {
+    if (input.headerImage && oldArticle?.headerImage?.url !== input.headerImage.url && input?.headerImage?.downloadUrl) {
       downloadUnsplashPhoto(input?.headerImage?.downloadUrl || '');
     }
 
     await context.db.doc(`articles/${article.id}`).set(article, { merge: true });
   } else {
     // Send the download event to Unsplash
-    if (input.headerImage) {
+    if (input.headerImage && input?.headerImage?.downloadUrl) {
       downloadUnsplashPhoto(input.headerImage.downloadUrl);
     }
 
