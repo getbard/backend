@@ -46,9 +46,9 @@ type ArticlesPayload {
 type ArticleHeaderImage {
   id: ID!
   url: String!
-  downloadUrl: String!
-  photographerName: String!
-  photographerUrl: String!
+  downloadUrl: String
+  photographerName: String
+  photographerUrl: String
 }
 
 type Article {
@@ -227,9 +227,9 @@ enum AuthLink {
 input ArticleHeaderImageInput {
   id: ID!
   url: String!
-  downloadUrl: String!
-  photographerName: String!
-  photographerUrl: String!
+  downloadUrl: String
+  photographerName: String
+  photographerUrl: String
 }
 
 input CreateOrUpdateArticleInput {
