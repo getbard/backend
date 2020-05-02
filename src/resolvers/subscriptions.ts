@@ -1,5 +1,6 @@
 import { AuthenticationError, ApolloError, UserInputError } from 'apollo-server';
 import Stripe from 'stripe';
+import * as Sentry from '@sentry/node';
 
 import { addActivity } from '../lib/stream';
 import { getUserById } from './users';
@@ -48,6 +49,7 @@ export const getSubscriptionWithStripeData = async (
     } as Subscription;
   } catch (error) {
     console.error('Failed to get subscription:', error.message);
+    Sentry.captureException(error);
   }
 
   return subscription;
@@ -181,6 +183,7 @@ const cancelSubscription = async (
     });
   } catch (error) {
     console.error('Failed to delete Stripe subscription:', error.message);
+    Sentry.captureException(error);
     throw new ApolloError('Failed to cancel subscription');
   }
 

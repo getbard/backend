@@ -1,6 +1,7 @@
 // Cannot use the mail package because of this issue
 // https://github.com/sendgrid/sendgrid-nodejs/issues/1057
 import mail from '@sendgrid/client';
+import * as Sentry from '@sentry/node';
 
 export const sendEmail = async ({
   personalizations,
@@ -41,5 +42,6 @@ export const sendEmail = async ({
     })
     .catch((error: any) => {
       console.error(`Failed to send an email to ${personalizations.to} using ${templateId}:`, JSON.stringify(error?.response?.body, null, 2));
+      Sentry.captureException(error);
     });
 }

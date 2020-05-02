@@ -39,6 +39,7 @@ const server = new ApolloServer({
         decodedToken = await fbase.auth().verifyIdToken(token.split(' ')[1]);
       } catch(error) {
         console.error('Invalid token sent from client:', error);
+        Sentry.captureException(error);
       }
     }
 

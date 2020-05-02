@@ -2,6 +2,7 @@ import { AuthenticationError } from 'apollo-server';
 import { storage } from 'firebase-admin';
 import cuid from 'cuid';
 import ImgixClient from 'imgix-core-js';
+import * as Sentry from '@sentry/node';
 
 import { Context } from '../types';
 import { UploadImageInput, UploadImagePayload } from './../generated/graphql';
@@ -40,6 +41,7 @@ const uploadImage = async (
     });
   } catch (error) {
     console.error('Failed to upload image to Cloud Store:', error);
+    Sentry.captureException(error);
   }
   
   const url = imgix.buildURL(fileName);
