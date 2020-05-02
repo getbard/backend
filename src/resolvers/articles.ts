@@ -2,6 +2,7 @@ import { downloadUnsplashPhoto } from './unsplashPhotos';
 import { AuthenticationError, UserInputError } from 'apollo-server';
 import slugify from 'slugify';
 import cuid from 'cuid';
+import * as Sentry from '@sentry/node';
 
 import { followStream, unfollowStream, addActivity, removeActivity } from './../lib/stream';
 import { getUserById, subscribers } from './users';
@@ -131,6 +132,7 @@ const sendArticleToSubscribers = async (article: Article, context: Context): Pro
     }
   } catch (error) {
     console.error('Failed to send email to subscribers:', error);
+    Sentry.captureException(error);
   }
 }
 

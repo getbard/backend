@@ -1,4 +1,5 @@
 import stream from 'getstream';
+import * as Sentry from '@sentry/node';
 
 import { Context } from '../types';
 
@@ -34,6 +35,7 @@ export const followStream = (
       resource: resourceId,
       user: context.userId,
     });
+    Sentry.captureException(error);
   }
 }
 
@@ -55,6 +57,7 @@ export const unfollowStream = (
       resource: resourceId,
       user: context.userId,
     });
+    Sentry.captureException(error);
   }
 }
 
@@ -91,6 +94,7 @@ export const addActivity = ({
     currUserFeed.addActivity(activity);
   } catch (error) {
     console.error(`Failed to add activity ${verb} feed:`, error?.detail || error, activity);
+    Sentry.captureException(error);
   }
 }
 
@@ -115,6 +119,7 @@ export const removeActivity = ({
     currUserFeed.removeActivity({ foreignId });
   } catch (error) {
     console.error(`Failed to add activity ${verb} feed:`, error?.detail || error, foreignId);
+    Sentry.captureException(error);
   }
 }
 

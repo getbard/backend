@@ -1,6 +1,7 @@
 import { AuthenticationError, UserInputError } from 'apollo-server';
 import cuid from 'cuid';
 import Stripe from 'stripe';
+import * as Sentry from '@sentry/node';
 
 import { getSubscriptionWithStripeData } from './subscriptions';
 import { sendEmail } from './email';
@@ -83,6 +84,7 @@ const createUser = async (
     });
   } catch (error) {
     console.error('Failed to create a stream for user:', error);
+    Sentry.captureException(error);
   }
 
   const emailLink = await context.firebase.auth().generateEmailVerificationLink(input.email);
@@ -133,6 +135,7 @@ const updateUser = async (
       });
     } catch (error) {
       console.error(`Failed to update user email for ${context.userId}:`, error);
+      Sentry.captureException(error);
       throw new UserInputError('Could not update email');
     }
   }
@@ -156,16 +159,23 @@ const stripePlan = async (
     typescript: true,
   });
 
-  const plan: Stripe.Plan = await stripe.plans.retrieve(parent.stripePlanId, undefined, {
-    stripeAccount: parent.stripeUserId || undefined,
-  });
+  try {
+    const plan: Stripe.Plan = await stripe.plans.retrieve(parent.stripePlanId, undefined, {
+      stripeAccount: parent.stripeUserId || undefined,
+    });
 
-  return {
-    id: plan.id,
-    currency: plan.currency,
-    amount: plan.amount,
-    interval: plan.interval,
-  };
+    return {
+      id: plan.id,
+      currency: plan.currency,
+      amount: plan.amount,
+      interval: plan.interval,
+    };
+  } catch (error) {
+    console.error('Failed to fetch Stripe plan:', error);
+    Sentry.captureException(error);
+  }
+
+  return null;
 }
 
 const subscriptions = async (

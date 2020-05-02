@@ -1,5 +1,6 @@
 import { AuthenticationError, ApolloError, UserInputError } from 'apollo-server';
 import Stripe from 'stripe';
+import * as Sentry from '@sentry/node';
 
 import { getUserById, getUserByStripeId } from './users';
 import { createSubscription } from './subscriptions';
@@ -66,6 +67,7 @@ const createDefaultStripePlan = async ({ userId, stripeUserId, context }: {
     }, { merge: true });
   } catch (error) {
     console.error('Failed to create default plan:', error.message);
+    Sentry.captureException(error);
   }
 }
 
@@ -100,6 +102,7 @@ const stripeSession = async (
       } }, context);
     } catch (error) {
       console.error('Failed to create a Stripe subscription:', error);
+      Sentry.captureException(error);
       throw new ApolloError('Failed to create a Stripe subscription');
     }
   }
@@ -157,6 +160,7 @@ const connectStripeAccount = async (
     return { success: true };
   } catch (error) {
     console.error('Failed to connect Stripe account:', error.message);
+    Sentry.captureException(error);
     throw new ApolloError(error);
   }
 }
