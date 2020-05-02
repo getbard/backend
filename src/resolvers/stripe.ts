@@ -184,7 +184,6 @@ const createStripeSession = async (
 
   if (!getUserByStripeId(input.stripeUserId, context)) {
     console.error('Failed to create a Stripe session, user not found with Stripe ID:', input.stripeUserId);
-    Sentry.captureException(error);
     throw new ApolloError('Could not find Stripe account for user');
   }
 
