@@ -34,21 +34,18 @@ export const downloadUnsplashPhoto = (downloadUrl: string): void => {
 
 const unsplashPhoto = async (
   _: null,
-  args: { search: string },
+  { search }: { search: string },
   context: Context
 ): Promise<UnsplashPhoto | null> => {
   if (!context.userId) {
     throw new AuthenticationError('Not authenticated');
   }
 
-  let photos;
-
-  if (args.search) {
-    const searchResults = await unsplash.search.photos(args.search, 1, 30, { orientation: 'landscape' }).then(toJson);
-    photos = searchResults?.results || [];
-  } else {
-    photos = await unsplash.photos.listPhotos(1, 30, 'latest').then(toJson);
-  }
+  const searchResults = await unsplash.search
+    .photos(search, 1, 30, { orientation: 'landscape' })
+    .then(toJson);
+    
+  const photos = searchResults?.results || [];
 
   return photos.map(({ id, urls, user, links }: UnsplashPhotoObject) => ({
     id,
