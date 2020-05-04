@@ -383,6 +383,9 @@ const createOrUpdateArticle = async (
       downloadUnsplashPhoto(input.headerImage.downloadUrl);
     }
 
+    // Make sure the ID doesn't exist
+    delete article.id;
+
     const articleRef = await context.db.collection('articles').add(article);
     articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
   }
