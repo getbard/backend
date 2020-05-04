@@ -206,6 +206,7 @@ enum Category {
   arts
   books
   business
+  creative_writing
   fiction
   health
   opinion
