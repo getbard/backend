@@ -78,6 +78,7 @@ const feed = async (
 
   if (!feed || !feed?.results?.length) {
     return {
+      id: `${context.userId}-feed`,
       next: '',
       results: [],
       unseen: 0,
@@ -121,7 +122,10 @@ const profileFeed = async (
     }
   }
   
-  return feed as ProfileFeed;
+  return {
+    id: `${args.userId}-feed`,
+    ...feed,
+  } as ProfileFeed;
 }
 
 export default {
