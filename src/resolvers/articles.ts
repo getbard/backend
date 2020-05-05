@@ -77,7 +77,7 @@ const sendArticleToSubscribers = async (article: Article, context: Context): Pro
     const authorSubscriptions = await getSubscriptionsByAuthorId(author.id, context);
     const authorName = `${author.firstName}${author?.lastName && ' ' + author.lastName}`;
     const authorLink = `<a href="https://getbard.com/${author?.username}">${authorName}</a>`;
-    const articleLink = `If you prefer, <a href="https://getbard.com/s/${article.slug}">you can read the article on Bard's platform</a>.`;
+    const articleLink = `If you prefer, <a href="https://getbard.com/articles/s/${article.slug}">you can read the article on Bard's platform</a>.`;
     const authorSupportLink = `<a href="https://getbard.com/${author?.username}?support=true">consider supporting ${authorName} on Bard</a>`;
     const subscribeButton = `<a href="https://getbard.com/${author?.username}?support=true" style="margin: 0 auto;text-align:center;background:#004346;color:white;padding:20px;border-radius:0.125rem;">Support ${authorName} on Bard</a><br/>`;
   
