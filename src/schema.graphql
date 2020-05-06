@@ -26,6 +26,7 @@ type Mutation {
   createStripeSession(input: CreateStripeSessionInput!): CreateStripeSessionPayload!
   createSubscription(input: CreateSubscriptionInput!): CreateSubscriptionPayload!
   cancelSubscription(input: CancelSubscriptionInput!): CancelSubscriptionPayload!
+  updateStripePlanPrice(input: UpdateStripePlanPriceInput!): UpdateStripePlanPricePayload!
   followUser(input: FollowUserInput!): FollowUserPayload!
   unfollowUser(input: UnfollowUserInput!): UnfollowUserPayload!
   createComment(input: CreateCommentInput!): CreateCommentPayload!
@@ -102,6 +103,7 @@ type User {
   stripeUserId: String
   stripePlanId: String
   stripePlan: StripePlan
+  stripeDashboardUrl: String
   profileSections: [ProfileSection]
 }
 
@@ -429,4 +431,12 @@ input DeleteProfileSectionInput {
 type DeleteProfileSectionPayload {
   id: ID!
   deletedAt: String!
+}
+
+input UpdateStripePlanPriceInput {
+  amount: Int!
+}
+
+type UpdateStripePlanPricePayload {
+  id: ID!
 }
