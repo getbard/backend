@@ -163,7 +163,7 @@ const cancelSubscription = async (
     throw new UserInputError('Subscription not found');
   }
 
-  if (context?.userId !== subscription.userId) {
+  if (context.userId !== subscription.userId) {
     throw new AuthenticationError('Not authorized');
   }
 

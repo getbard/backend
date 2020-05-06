@@ -128,7 +128,7 @@ const connectStripeAccount = async (
     throw new AuthenticationError('Not authenticated');
   }
 
-  if (context?.userId !== input.userId) {
+  if (context.userId !== input.userId) {
     throw new AuthenticationError('Not authorized');
   }
 

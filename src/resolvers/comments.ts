@@ -104,11 +104,11 @@ const updateComment = async (
   const commentDoc = await context.db.doc(`comments/${input.id}`).get();
   const comment = commentDoc.data() as Comment | undefined;
 
-  if (!comment) {
+  if (!comment || !comment.userId) {
     throw new UserInputError('Comment not found');
   }
 
-  if (comment.userId && context?.userId !== comment.userId) {
+  if (context.userId !== comment.userId) {
     throw new AuthenticationError('Not authorized');
   }
 
@@ -142,11 +142,11 @@ const deleteComment = async (
   const commentDoc = await context.db.doc(`comments/${input.id}`).get();
   const comment = commentDoc.data() as Comment | undefined;
 
-  if (!comment) {
+  if (!comment || !comment.userId) {
     throw new UserInputError('Comment not found');
   }
 
-  if (comment.userId && context?.userId !== comment.userId) {
+  if (context.userId !== comment.userId) {
     throw new AuthenticationError('Not authorized');
   }
 
