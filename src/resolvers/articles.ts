@@ -320,79 +320,6 @@ const articlesByUser = async (
   return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
 };
 
-const createOrUpdateArticle = async (
-  _: null,
-  { input }: { input: CreateOrUpdateArticleInput },
-  context: Context
-): Promise<CreateOrUpdateArticlePayload> => {
-  if (!context.userId) {
-    throw new AuthenticationError('Not authenticated');
-  }
-
-  // TODO: Make this query the DB and check the article user
-  // instead of checking the input
-  if (input.userId && context?.userId !== input.userId) {
-    throw new AuthenticationError('Not authorized');
-  }
-
-  const defaultArticle = {
-    userId: context.userId,
-    title: '',
-    summary: '',
-    content: '',
-    headerImage: null,
-    slug: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    publishedAt: null,
-    deletedAt: null,
-    subscribersOnly: false,
-    wordCount: 0,
-    category: null,
-  };
-
-  const article: CreateOrUpdateArticleInput = {
-    ...defaultArticle,
-    ...input,
-    updatedAt: new Date().toISOString(),
-  };
-  let articleDoc;
-
-  if (article.title && article.title.length > 80) {
-    article.title = article.title.substring(0, 80);  
-  }
-
-  if (article.summary && article.summary.length > 280) {
-    article.summary = article.summary.substring(0, 280);
-  }
-
-  if (article.id) {
-    // Get the image before updating so we can send a download event to Unsplash
-    articleDoc = await context.db.doc(`articles/${article.id}`).get();
-    const oldArticle = { ...articleDoc.data() };
-
-    // Send the download event to Unsplash
-    if (input.headerImage && oldArticle?.headerImage?.url !== input.headerImage.url && input?.headerImage?.downloadUrl) {
-      downloadUnsplashPhoto(input?.headerImage?.downloadUrl || '');
-    }
-
-    await context.db.doc(`articles/${article.id}`).set(article, { merge: true });
-  } else {
-    // Send the download event to Unsplash
-    if (input.headerImage && input?.headerImage?.downloadUrl) {
-      downloadUnsplashPhoto(input.headerImage.downloadUrl);
-    }
-
-    // Make sure the ID doesn't exist
-    delete article.id;
-
-    const articleRef = await context.db.collection('articles').add(article);
-    articleDoc = await context.db.doc(`articles/${articleRef.id}`).get();
-  }
-
-  return { id: articleDoc.id } as CreateOrUpdateArticlePayload;
-}
-
 const createArticle = async (
   _: null,
   { input }: { input: CreateOrUpdateArticleInput },
@@ -455,9 +382,10 @@ const updateArticle = async (
     throw new AuthenticationError('Not authenticated');
   }
 
-  // TODO: Make this query the DB and check the article user
-  // instead of checking the input
-  if (input.userId && context?.userId !== input.userId) {
+  const articleDoc = await context.db.doc(`articles/${input.id}`).get();
+  const oldArticle = { ...articleDoc.data() };
+
+  if (context.userId !== oldArticle.userId) {
     throw new AuthenticationError('Not authorized');
   }
 
@@ -473,10 +401,6 @@ const updateArticle = async (
   if (article.summary && article.summary.length > 280) {
     article.summary = article.summary.substring(0, 280);
   }
-
-  // Get the image before updating so we can send a download event to Unsplash
-  const articleDoc = await context.db.doc(`articles/${article.id}`).get();
-  const oldArticle = { ...articleDoc.data() };
 
   // Send the download event to Unsplash
   if (input.headerImage && oldArticle?.headerImage?.url !== input.headerImage.url && input?.headerImage?.downloadUrl) {
@@ -509,7 +433,7 @@ const publishArticle = async (
     throw new UserInputError('Article not found');
   }
 
-  if (context?.userId !== article.userId) {
+  if (context.userId !== article.userId) {
     throw new AuthenticationError('Not authorized');
   }
 
@@ -587,7 +511,7 @@ const deleteArticle = async (
     throw new UserInputError('Article not found');
   }
 
-  if (context?.userId !== article.userId) {
+  if (context.userId !== article.userId) {
     throw new AuthenticationError('Not authorized');
   }
 
@@ -646,7 +570,6 @@ export default {
     articlesByUser,
   },
   Mutation: {
-    createOrUpdateArticle,
     createArticle,
     updateArticle,
     publishArticle,
