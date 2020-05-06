@@ -16,7 +16,6 @@ type Query {
 }
 
 type Mutation {
-  createOrUpdateArticle(input: CreateOrUpdateArticleInput!): CreateOrUpdateArticlePayload!
   createArticle(input: CreateOrUpdateArticleInput!): CreateOrUpdateArticlePayload!
   updateArticle(input: CreateOrUpdateArticleInput!): CreateOrUpdateArticlePayload!
   publishArticle(input: PublishArticleInput!): PublishArticlePayload!

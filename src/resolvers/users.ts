@@ -121,11 +121,19 @@ const updateUser = async (
     throw new AuthenticationError('Not authenticated');
   }
 
-  if (input.id && context.userId !== input.id) {
+  if (!input.id) {
+    throw new UserInputError('No user ID found');
+  }
+
+  if (context.userId !== input.id) {
     throw new AuthenticationError('Not authorized');
   }
 
   const user = await getUserById(context.userId, context);
+
+  if (!user) {
+    throw new UserInputError('No user found');
+  }
 
   if (user?.email !== input.email) {
     try {

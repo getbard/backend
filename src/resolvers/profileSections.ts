@@ -101,7 +101,7 @@ const updateProfileSection = async (
 
   const oldSection = { ...sectionDoc.data() };
 
-  if (context?.userId !== oldSection.userId) {
+  if (context.userId !== oldSection.userId) {
     throw new AuthenticationError('Not authorized');
   }
 
@@ -135,11 +135,11 @@ const deleteProfileSection = async (
   const sectionDoc = await context.db.doc(`sections/${input.id}`).get();
   const section = sectionDoc.data() as ProfileSection | undefined;
 
-  if (!section) {
+  if (!section || !section.userId) {
     throw new UserInputError('Section not found');
   }
 
-  if (section.userId && context?.userId !== section.userId) {
+  if (context.userId !== section.userId) {
     throw new AuthenticationError('Not authorized');
   }
 
