@@ -12,6 +12,8 @@ import {
   ConnectStripeAccountPayload,
   CreateStripeSessionInput,
   CreateStripeSessionPayload,
+  UpdateStripePlanPriceInput,
+  UpdateStripePlanPricePayload,
 } from '../generated/graphql';
 
 const formatAmountForStripe = (
@@ -232,6 +234,76 @@ const createStripeSession = async (
   return checkoutSession;
 }
 
+const updateStripePlanPrice = async (
+  _: null,
+  { input }: { input: UpdateStripePlanPriceInput },
+  context: Context,
+): Promise<UpdateStripePlanPricePayload | null> => {
+  if (!context.userId) {
+    throw new AuthenticationError('Not authenticated');
+  }
+
+  const user = await getUserById(context.userId, context);
+
+  if (!user) {
+    throw new UserInputError('User not found');
+  }
+
+  if (!user.stripeUserId) {
+    throw new UserInputError(`Invalid Stripe user (${user.id})`);
+  }
+
+  if (!user.stripePlanId) {
+    throw new UserInputError(`Stripe Plan not found for user ${user.id}`);
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2020-03-02',
+    typescript: true,
+  });
+
+  const currPlan: Stripe.Plan = await stripe.plans.retrieve(user.stripePlanId, {
+    expand: ['product'],
+  }, {
+    stripeAccount: user.stripeUserId,
+  });
+
+  const { product } = currPlan;
+
+  if (!product || typeof product === 'string') {
+    console.error(`Valid Stripe Product not found on plan for user (${user.id})`, currPlan);
+    throw new UserInputError(`Valid Stripe Product not found for user ${user.id}`);
+  }
+
+  try {
+    // Create a new plan on Stripe
+    const plan = await stripe.plans.create({
+      amount: formatAmountForStripe(input.amount, 'usd'),
+      currency: 'usd',
+      interval: 'month',
+      product: product.id,
+    }, {
+      stripeAccount: user.stripeUserId,
+    });
+
+    await stripe.plans.del(currPlan.id, {
+      stripeAccount: user.stripeUserId,
+    });
+
+    // Update the user with the new plan
+    await context.db
+      .doc(`users/${context.userId}`)
+      .set({ stripePlanId: plan.id }, { merge: true });
+
+    return { id: plan.id };
+  }
+  catch (error) {
+    console.error('Failed to update Stripe Plan Price:', error);
+    Sentry.captureException(error);
+    throw new UserInputError('Could not update Stripe Plan');
+  }
+}
+
 export default {
   Query: {
     stripeSession,
@@ -239,5 +311,6 @@ export default {
   Mutation: {
     connectStripeAccount,
     createStripeSession,
+    updateStripePlanPrice,
   },
 }

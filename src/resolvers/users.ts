@@ -281,6 +281,31 @@ const profileSections = async (
     } as ProfileSection));
 }
 
+const stripeDashboardUrl = async (
+  parent: User,
+  _: null,
+  context: Context,
+): Promise<string | null> => {
+  if (!parent?.stripeUserId) {
+    return null;
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2020-03-02',
+    typescript: true,
+  });
+
+  try {
+    const loginLink: Stripe.LoginLink = await stripe.accounts.createLoginLink(parent.stripeUserId);
+    return loginLink?.url;
+  } catch (error) {
+    console.error('Failed to fetch Stripe Dashboard URL:', error);
+    Sentry.captureException(error);
+  }
+
+  return null;
+}
+
 export default {
   Query: {
     user,
@@ -296,5 +321,6 @@ export default {
     followers,
     following,
     profileSections,
+    stripeDashboardUrl,
   }
 }
