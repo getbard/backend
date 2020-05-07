@@ -212,8 +212,15 @@ enum Category {
   books
   business
   creative_writing
+  culture
+  education
+  entertainment
+  family
   fiction
+  food
   health
+  history
+  lifestyle
   opinion
   philosophy
   politics
@@ -221,8 +228,11 @@ enum Category {
   relationships
   science
   self
+  sports
   technology
   travel
+  writing
+  world
 }
 
 enum AuthLink {
