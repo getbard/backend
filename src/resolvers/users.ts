@@ -319,11 +319,16 @@ const collections = async (
     .orderBy('createdAt', 'asc')
     .get();
 
-  return collections.docs
+  const collectionsDocs = collections.docs
     .map((collectionDoc): Collection => ({
       id: collectionDoc.id,
       ...collectionDoc.data()
-    } as Collection));
+    } as Collection))
+    .filter((collection: Collection) => (
+      collection.public || (!collection.public && collection.userId === context.userId)
+    ));
+
+  return collectionsDocs;
 }
 
 export default {

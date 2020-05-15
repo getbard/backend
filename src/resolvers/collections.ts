@@ -2,7 +2,9 @@ import { AuthenticationError, UserInputError } from 'apollo-server';
 
 import { Context } from '../types';
 import {
+  Article,
   Collection,
+  User,
   CreateCollectionInput,
   CreateCollectionPayload,
   UpdateCollectionInput,
@@ -10,6 +12,8 @@ import {
   DeleteCollectionInput,
   DeleteCollectionPayload,
 } from '../generated/graphql';
+
+import { getUserById } from './users';
 
 const collection = async (
   _: null, 
@@ -21,6 +25,10 @@ const collection = async (
 
   if (!collection) {
     throw new UserInputError('Collection not found');
+  }
+
+  if (!collection.public && context.userId !== collection.userId) {
+    throw new AuthenticationError('Not authorized');
   }
 
   return {
@@ -73,7 +81,7 @@ const updateCollection = async(
   const oldCollection = { ...collectionDoc.data() };
 
   if (!oldCollection) {
-    throw new UserInputError('Article not found');
+    throw new UserInputError('Collection not found');
   }
 
   if (context.userId !== oldCollection.userId) {
@@ -120,6 +128,38 @@ const deleteCollection = async(
   return deleted as DeleteCollectionPayload;
 }
 
+export const articles = async (
+  parent: Collection,
+  _: null,
+  context: Context,
+): Promise<Article[]> => {
+  const articles = await context.db
+    .collection('articles')
+    .where('id', 'in', parent.articleIds)
+    .where('deletedAt', '==', null)
+    .get();
+
+  return articles.docs
+    .map((articleDoc): Article => {
+      return {
+        id: articleDoc.id,
+        ...articleDoc.data()
+      } as Article;
+    });
+}
+
+const user = async (
+  parent: Collection,
+  _: null,
+  context: Context,
+): Promise<User | null> => {
+  if (!parent.userId) {
+    return null;
+  }
+
+  return await getUserById(parent.userId, context);
+}
+
 export default {
   Query: {
     collection,
@@ -129,4 +169,8 @@ export default {
     updateCollection,
     deleteCollection,
   },
+  Collection: {
+    articles,
+    user,
+  }
 }
