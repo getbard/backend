@@ -158,7 +158,7 @@ const articles = async (
       .where('deletedAt', '==', null)
       .orderBy('publishedAt', 'desc')
       .orderBy('headerImage.id')
-      .orderBy('updatedAt', 'desc')
+      .orderBy('updatedAt', 'desc');
 
     articlesWithoutHeader = await context.db
       .collection('articles')
@@ -166,7 +166,7 @@ const articles = async (
       .where('deletedAt', '==', null)
       .where('headerImage', '==', null)
       .orderBy('publishedAt', 'desc')
-      .orderBy('updatedAt', 'desc')
+      .orderBy('updatedAt', 'desc');
   } else {
     articlesWithHeader = await context.db
       .collection('articles')
@@ -175,7 +175,7 @@ const articles = async (
       .where('deletedAt', '==', null)
       .orderBy('publishedAt', 'desc')
       .orderBy('headerImage.id')
-      .orderBy('updatedAt', 'desc')
+      .orderBy('updatedAt', 'desc');
 
     articlesWithoutHeader = await context.db
       .collection('articles')
@@ -184,7 +184,7 @@ const articles = async (
       .where('deletedAt', '==', null)
       .where('headerImage', '==', null)
       .orderBy('publishedAt', 'desc')
-      .orderBy('updatedAt', 'desc')
+      .orderBy('updatedAt', 'desc');
   }
 
   if (args?.headerCursor && args?.headlessCursor) {
