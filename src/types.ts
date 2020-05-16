@@ -7,3 +7,12 @@ export interface Context {
   stream: stream.StreamClient;
   firebase: app.App;
 }
+
+export type Activity = {
+  context: Context;
+  verb: string;
+  objectType: string;
+  objectId: string;
+  to?: string[];
+  custom?: { [key: string]: any };
+}

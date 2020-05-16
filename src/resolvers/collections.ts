@@ -1,6 +1,7 @@
 import { AuthenticationError, UserInputError } from 'apollo-server';
+import { addActivity } from '../lib/stream';
 
-import { Context } from '../types';
+import { Context, Activity } from '../types';
 import {
   Article,
   Collection,
@@ -15,7 +16,7 @@ import {
 
 import { getUserById } from './users';
 
-const collection = async (
+export const collection = async (
   _: null, 
   { id }: { id: string },
   context: Context,
@@ -65,6 +66,15 @@ const createCollection = async(
   const collectionRef = await context.db.collection('collections').add(collection);
   const collectionDoc = await context.db.doc(`collections/${collectionRef.id}`).get();
 
+  if (collection.public) {
+    addActivity({
+      context,
+      verb: 'created',
+      objectType: 'collection',
+      objectId: collectionDoc.id,
+    });
+  }
+
   return { id: collectionDoc.id } as CreateCollectionPayload;
 }
 
@@ -94,6 +104,29 @@ const updateCollection = async(
   };
 
   await context.db.doc(`collections/${collection.id}`).set(collection, { merge: true });
+
+  const articleIdsDiffer = oldCollection?.articleIds?.length !== collection?.articleIds?.length;
+  const articleAdded = articleIdsDiffer && collection.articleIds && oldCollection.articleIds.length < collection?.articleIds.length;
+  if (articleAdded && collection.public) {
+    const newArticleId = collection?.articleIds?.filter(articleId => {
+      return !new Set([...oldCollection?.articleIds]).has(articleId);
+    });
+
+    const activity = {
+      context,
+      verb: 'collected',
+      objectType: 'collection',
+      objectId: collectionDoc.id,
+    } as Activity;
+
+    if (newArticleId) {
+      activity.custom = {
+        collectedArticle: newArticleId,
+      };
+    }
+
+    addActivity(activity);
+  }
 
   return { id: collectionDoc.id } as UpdateCollectionPayload;
 }
@@ -133,6 +166,10 @@ export const articles = async (
   _: null,
   context: Context,
 ): Promise<Article[]> => {
+  if (!parent?.articleIds?.length) {
+    return [];
+  }
+
   const articles = await context.db
     .collection('articles')
     .where('id', 'in', parent.articleIds)

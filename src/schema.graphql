@@ -196,7 +196,7 @@ type FeedItem {
   activities: [FeedActivity]!
 }
 
-union FeedActivityObject = Article | Comment | User
+union FeedActivityObject = Article | Comment | User | Collection
 
 type FeedActivity {
   id: ID!
@@ -204,6 +204,7 @@ type FeedActivity {
   verb: String!
   time: String!
   object: FeedActivityObject
+  collectedArticle: [String]
 }
 
 type ProfileFeed {

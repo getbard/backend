@@ -316,7 +316,7 @@ const collections = async (
     .collection('collections')
     .where('userId', '==', parent.id)
     .where('deletedAt', '==', null)
-    .orderBy('createdAt', 'asc')
+    .orderBy('createdAt', 'desc')
     .get();
 
   const collectionsDocs = collections.docs
