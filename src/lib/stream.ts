@@ -1,7 +1,7 @@
 import stream from 'getstream';
 import * as Sentry from '@sentry/node';
 
-import { Context } from '../types';
+import { Context, Activity } from '../types';
 
 let client;
 
@@ -67,19 +67,14 @@ export const addActivity = ({
   objectType,
   objectId,
   to = [],
-}: {
-  context: Context;
-  verb: string;
-  objectType: string;
-  objectId: string;
-  to?: string[];
-}): void => {
+  custom = {},
+}: Activity): void => {
   if (!context.userId) {
     console.error(`Failed to add activity ${verb}, user context not found`);
     return;
   }
 
-  const activity = {
+  let activity = {
     actor: context.userId,
     verb,
     object: `${objectType}:${objectId}`,
@@ -88,6 +83,13 @@ export const addActivity = ({
     foreign_id: `${verb}:${objectId}`,
     time: new Date().toISOString(),
   };
+
+  if (custom) {
+    activity = {
+      ...activity,
+      ...custom,
+    }
+  }
 
   try {
     const currUserFeed = context.stream.feed('user', context.userId);

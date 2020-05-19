@@ -12,6 +12,7 @@ import {
   StripePlan,
   Subscription,
   ProfileSection,
+  Collection,
   CreateUserInput,
   CreateUserPayload,
   UpdateUserInput,
@@ -306,6 +307,30 @@ const stripeDashboardUrl = async (
   return null;
 }
 
+const collections = async (
+  parent: User,
+  _: null,
+  context: Context,
+): Promise<Collection[]> => {
+  const collections = await context.db
+    .collection('collections')
+    .where('userId', '==', parent.id)
+    .where('deletedAt', '==', null)
+    .orderBy('createdAt', 'desc')
+    .get();
+
+  const collectionsDocs = collections.docs
+    .map((collectionDoc): Collection => ({
+      id: collectionDoc.id,
+      ...collectionDoc.data()
+    } as Collection))
+    .filter((collection: Collection) => (
+      collection.public || (!collection.public && collection.userId === context.userId)
+    ));
+
+  return collectionsDocs;
+}
+
 export default {
   Query: {
     user,
@@ -322,5 +347,6 @@ export default {
     following,
     profileSections,
     stripeDashboardUrl,
+    collections,
   }
 }

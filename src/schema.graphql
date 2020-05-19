@@ -4,6 +4,7 @@ type Query {
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!, drafts: Boolean): [Article]
   authLink(type: AuthLink!, email: String!): String
+  collection(id: ID!): Collection
   commentsByResourceId(resourceId: ID!): [Comment]
   feed: Feed
   profileFeed(userId: ID): ProfileFeed
@@ -36,6 +37,9 @@ type Mutation {
   createProfileSection(input: CreateProfileSectionInput!): CreateProfileSectionPayload!
   updateProfileSection(input: UpdateProfileSectionInput!): UpdateProfileSectionPayload!
   deleteProfileSection(input: DeleteProfileSectionInput!): DeleteProfileSectionPayload!
+  createCollection(input: CreateCollectionInput!): CreateCollectionPayload!
+  updateCollection(input: UpdateCollectionInput!): UpdateCollectionPayload!
+  deleteCollection(input: DeleteCollectionInput!): DeleteCollectionPayload!
 }
 
 type ArticlesPayload {
@@ -105,6 +109,7 @@ type User {
   stripePlan: StripePlan
   stripeDashboardUrl: String
   profileSections: [ProfileSection]
+  collections: [Collection]
 }
 
 type Comment {
@@ -191,7 +196,7 @@ type FeedItem {
   activities: [FeedActivity]!
 }
 
-union FeedActivityObject = Article | Comment | User
+union FeedActivityObject = Article | Comment | User | Collection
 
 type FeedActivity {
   id: ID!
@@ -199,12 +204,27 @@ type FeedActivity {
   verb: String!
   time: String!
   object: FeedActivityObject
+  collectedArticle: [String]
 }
 
 type ProfileFeed {
   id: String
   next: String!
   results: [FeedActivity]!
+}
+
+type Collection {
+  id: ID!
+  name: String
+  userId: String
+  user: User
+  description: String
+  articles: [Article]
+  articleIds: [String]
+  public: Boolean
+  createdAt: String!
+  updatedAt: String!
+  deletedAt: String
 }
 
 enum Category {
@@ -449,4 +469,36 @@ input UpdateStripePlanPriceInput {
 
 type UpdateStripePlanPricePayload {
   id: ID!
+}
+
+input CreateCollectionInput {
+  name: String!
+  description: String
+  articleIds: [String]
+  public: Boolean
+}
+
+type CreateCollectionPayload {
+  id: ID!
+}
+
+input UpdateCollectionInput {
+  id: ID!
+  name: String
+  description: String
+  articleIds: [String]
+  public: Boolean
+}
+
+type UpdateCollectionPayload {
+  id: ID!
+}
+
+input DeleteCollectionInput {
+  id: ID!
+}
+
+type DeleteCollectionPayload {
+  id: ID!
+  deletedAt: String!
 }

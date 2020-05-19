@@ -3,6 +3,7 @@ import merge from 'lodash.merge';
 
 import articles from './articles';
 import auth from './auth';
+import collections from './collections';
 import comments from './comments';
 import feeds from './feeds';
 import follows from './follows';
@@ -16,6 +17,7 @@ import unsplashPhotos from './unsplashPhotos';
 const resolvers: IResolvers = merge(
   articles,
   auth,
+  collections,
   comments,
   feeds,
   follows,

@@ -6,6 +6,7 @@ import { Feed, ProfileFeed } from './../generated/graphql';
 import { getUserById } from './users';
 import { comment } from './comments';
 import { article } from './articles';
+import { collection } from './collections';
 
 const feed = async (
   _: null,
@@ -62,6 +63,9 @@ const feed = async (
         case 'subscription':
           activity.object = await getUserById(id, context);
           break;
+        case 'collection':
+          activity.object = await collection(null, { id }, context);
+          break;
         default:
           activity.object = null;
       }
@@ -117,6 +121,9 @@ const profileFeed = async (
       case 'subscription':
         result.object = await getUserById(id, context);
         break;
+      case 'collection':
+        result.object = await collection(null, { id }, context);
+        break;
       default:
         result.object = null;
     }
@@ -145,6 +152,10 @@ export default {
 
       if (obj.username) {
         return 'User';
+      }
+
+      if (obj.name && obj.public) {
+        return 'Collection';
       }
 
       return null;
