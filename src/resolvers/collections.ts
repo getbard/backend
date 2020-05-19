@@ -174,6 +174,7 @@ export const articles = async (
     .collection('articles')
     .where('id', 'in', parent.articleIds)
     .where('deletedAt', '==', null)
+    .orderBy('createdAt', 'desc')
     .get();
 
   return articles.docs
