@@ -282,9 +282,14 @@ const articleBySlug = async (
 
 const articlesByUser = async (
   _: null, 
-  args: {
+  {
+    userId,
+    drafts,
+    limit = 100,
+  }: {
     userId: string;
     drafts: boolean;
+    limit: number;
   },
   context: Context
 ): Promise<Article[]> => {
@@ -292,16 +297,17 @@ const articlesByUser = async (
   let articles;
 
   // Filter out drafts if the requesting user isn't the author
-  if (context.userId === args.userId) {
+  if (context.userId === userId) {
     articles = await articlesRef
-      .where('userId', '==', args.userId)
+      .where('userId', '==', userId)
       .where('deletedAt', '==', null)
       .orderBy('updatedAt', 'desc')
+      .limit(limit)
       .get();
 
     // Filter out user drafts if they weren't explicitely requested
     // @TODO: Move this into a different request?
-    if (!args.drafts) {
+    if (!drafts) {
       return articles.docs.filter(article => {
         const articleData = article.data();
         return articleData.publishedAt;
@@ -309,11 +315,12 @@ const articlesByUser = async (
     }
   } else {
     articles = await articlesRef
-      .where('userId', '==', args.userId)
+      .where('userId', '==', userId)
       .where('publishedAt', '>', '')
       .where('deletedAt', '==', null)
       .orderBy('publishedAt', 'desc')
       .orderBy('updatedAt', 'desc')
+      .limit(limit)
       .get();
   }
 
