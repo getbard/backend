@@ -3,6 +3,7 @@ type Query {
   article(id: ID!): Article
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!, drafts: Boolean, limit: Int): [Article]
+  freeArticlesByUser(userId: ID!, limit: Int): [Article]
   authLink(type: AuthLink!, email: String!): String
   collection(id: ID!): Collection
   commentsByResourceId(resourceId: ID!): [Comment]

@@ -327,6 +327,32 @@ const articlesByUser = async (
   return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
 };
 
+const freeArticlesByUser = async (
+  _: null, 
+  {
+    userId,
+    limit = 3,
+  }: {
+    userId: string;
+    limit: number;
+  },
+  context: Context
+): Promise<Article[]> => {
+  const articlesRef = await context.db.collection('articles');
+
+  const articles = await articlesRef
+    .where('userId', '==', userId)
+    .where('publishedAt', '>', '')
+    .where('deletedAt', '==', null)
+    .where('subscribersOnly', '==', false)
+    .orderBy('publishedAt', 'desc')
+    .orderBy('updatedAt', 'desc')
+    .limit(limit)
+    .get();
+
+  return articles.docs.map(article => ({ id: article.id, ...article.data() })) as Article[];
+};
+
 const createArticle = async (
   _: null,
   { input }: { input: CreateOrUpdateArticleInput },
@@ -575,6 +601,7 @@ export default {
     article,
     articleBySlug,
     articlesByUser,
+    freeArticlesByUser,
   },
   Mutation: {
     createArticle,
