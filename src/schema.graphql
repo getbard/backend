@@ -111,6 +111,7 @@ type User {
   stripeDashboardUrl: String
   profileSections: [ProfileSection]
   collections: [Collection]
+  avatarUrl: String
 }
 
 type Comment {
@@ -424,10 +425,11 @@ type UploadImagePayload {
 
 input UpdateUserInput {
   id: ID!
-  firstName: String!
+  firstName: String
   lastName: String
-  username: String!
-  email: String!
+  username: String
+  email: String
+  avatarUrl: String
 }
 
 type UpdateUserPayload {

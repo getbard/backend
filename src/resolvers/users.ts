@@ -136,7 +136,7 @@ const updateUser = async (
     throw new UserInputError('No user found');
   }
 
-  if (user?.email !== input.email) {
+  if (input?.email && user?.email !== input.email) {
     try {
       context.firebase.auth().updateUser(context.userId, {
         email: input.email,
