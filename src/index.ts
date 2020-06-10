@@ -7,6 +7,7 @@ import fs from 'fs';
 import * as Sentry from '@sentry/node';
 
 import db from './lib/db';
+// import bigQuery from './lib/bigQuery';
 const firebaseConfig = JSON.parse(fs.readFileSync(`${__dirname}/../firebase.json`, 'utf8'));
 
 import stream from './lib/stream';
@@ -45,6 +46,7 @@ const server = new ApolloServer({
 
     return {
       db,
+      // bigQuery,
       userId: decodedToken?.uid || null,
       stream,
       firebase: fbase,

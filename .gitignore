@@ -28,3 +28,4 @@ yarn-error.log*
 # secret things
 firebase.json
 firebase.*.json
+service-account.json

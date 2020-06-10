@@ -20,6 +20,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@google-cloud/bigquery": "^4.7.0",
     "@graphql-codegen/typescript-resolvers": "^1.13.0",
     "@sendgrid/client": "^7.0.0",
     "@sentry/node": "^5.15.4",
