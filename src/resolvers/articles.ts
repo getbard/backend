@@ -248,8 +248,8 @@ export const article = async (
   }
 
   return {
-    id: articleDoc.id,
     ...article,
+    id: articleDoc.id,
     content: getArticleContent(article, contentBlocked),
     contentBlocked,
   };
@@ -277,8 +277,8 @@ const articleBySlug = async (
   const contentBlocked = await shouldBlockContent(article, context);
 
   return {
-    id: articleDoc.id,
     ...article,
+    id: articleDoc.id,
     content: getArticleContent(article, contentBlocked),
     contentBlocked,
   };
@@ -612,8 +612,17 @@ const analytics = async (
     throw new AuthenticationError('Not authorized');
   }
 
+  const totalComments = await comments(parent, null, context);
+
   if (!context.bigQuery) {
-    return {};
+    return {
+      totalViews: 0,
+      totalReads: 0,
+      totalComments: totalComments.length,
+      views: [],
+      reads: [],
+      wordCount: parent.wordCount,
+    };
   }
 
   const viewQuery = `
@@ -643,8 +652,6 @@ const analytics = async (
   const [readJob] = await context.bigQuery.createQueryJob({ query: readQuery });
   const [readResults] = await readJob.getQueryResults();
   const totalReads = readResults.reduce((a, b) => a + b.count, 0);
-
-  const totalComments = await comments(parent, null, context);
 
   return {
     totalViews,
