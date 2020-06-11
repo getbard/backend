@@ -1,5 +1,5 @@
 type Query {
-  articles(category: String, headerCursor: String, headlessCursor: String): ArticlesPayload
+  articles(category: String, cursor: String, headerCursor: String, headlessCursor: String): ArticlesPayload
   article(id: ID!): Article
   articleBySlug(slug: String!): Article
   articlesByUser(userId: ID!, drafts: Boolean, limit: Int): [Article]
@@ -48,6 +48,8 @@ type ArticlesPayload {
   articlesWithoutHeader: [Article],
   headerCursor: String
   headlessCursor: String
+  articles: [Article]
+  cursor: String
 }
 
 type ArticleHeaderImage {
