@@ -625,13 +625,15 @@ const analytics = async (
     };
   }
 
+  const table = process.env.NODE_ENV === 'production' ? 'bard-prod' : 'bard-stage'
+
   const viewQuery = `
     SELECT
       article_id,
         FORMAT_DATE("%Y-%m-%d", CAST(timestamp as date)) as date,
       COUNT(article_id) as count
-    FROM \`bard-stage.webapp.article_article_viewed\`
-    WHERE \`bard-stage.webapp.article_article_viewed\`.article_id = '${parent.id}'
+    FROM \`${table}.webapp.article_article_viewed\`
+    WHERE \`${table}.webapp.article_article_viewed\`.article_id = '${parent.id}'
     GROUP BY article_id, date
   `;
 
@@ -644,8 +646,8 @@ const analytics = async (
       article_id,
         FORMAT_DATE("%Y-%m-%d", CAST(timestamp as date)) as date,
       COUNT(article_id) as count
-    FROM \`bard-stage.webapp.article_article_read\`
-    WHERE \`bard-stage.webapp.article_article_read\`.article_id = '${parent.id}'
+    FROM \`${table}.webapp.article_article_read\`
+    WHERE \`${table}.webapp.article_article_read\`.article_id = '${parent.id}'
     GROUP BY article_id, date
   `;
 
