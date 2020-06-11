@@ -628,7 +628,7 @@ const analytics = async (
   const viewQuery = `
     SELECT
       article_id,
-        FORMAT_DATE("%m-%d-%Y", CAST(timestamp as date)) as date,
+        FORMAT_DATE("%Y-%m-%d", CAST(timestamp as date)) as date,
       COUNT(article_id) as count
     FROM \`bard-stage.webapp.article_article_viewed\`
     WHERE \`bard-stage.webapp.article_article_viewed\`.article_id = '${parent.id}'
@@ -642,7 +642,7 @@ const analytics = async (
   const readQuery = `
     SELECT 
       article_id,
-        FORMAT_DATE("%m-%d-%Y", CAST(timestamp as date)) as date,
+        FORMAT_DATE("%Y-%m-%d", CAST(timestamp as date)) as date,
       COUNT(article_id) as count
     FROM \`bard-stage.webapp.article_article_read\`
     WHERE \`bard-stage.webapp.article_article_read\`.article_id = '${parent.id}'
