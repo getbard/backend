@@ -77,6 +77,21 @@ type Article {
   subscribersOnly: Boolean!
   slug: String
   contentBlocked: Boolean
+  analytics: ArticleAnalytics
+}
+
+type ArticleAnalytics {
+  totalViews: Int
+  totalReads: Int
+  reads: [AnalyticDetail]
+  views: [AnalyticDetail]
+  totalComments: Int
+  wordCount: Int
+}
+
+type AnalyticDetail {
+  date: String
+  count: Int
 }
 
 type ProfileSection {
@@ -112,6 +127,14 @@ type User {
   profileSections: [ProfileSection]
   collections: [Collection]
   avatarUrl: String
+  analytics: UserAnalytics
+}
+
+type UserAnalytics {
+  wordsWritten: Int
+  subscriberCount: Int
+  followerCount: Int
+  joinDate: String
 }
 
 type Comment {

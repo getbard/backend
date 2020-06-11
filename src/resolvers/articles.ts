@@ -3,6 +3,8 @@ import { AuthenticationError, UserInputError } from 'apollo-server';
 import slugify from 'slugify';
 import cuid from 'cuid';
 import * as Sentry from '@sentry/node';
+import { BigQuery } from '@google-cloud/bigquery';
+import fs from 'fs';
 
 import { followStream, unfollowStream, addActivity, removeActivity } from './../lib/stream';
 import { getUserById, subscribers } from './users';
@@ -14,6 +16,7 @@ import { Context } from '../types';
 import {
   Article,
   ArticlesPayload,
+  ArticleAnalytics,
   Comment,
   Subscription,
   User,
@@ -21,6 +24,7 @@ import {
   CreateOrUpdateArticlePayload,
   PublishArticleInput,
   DeleteArticleInput,
+  AnalyticDetail,
 } from '../generated/graphql';
 
 const createArticleSlug = (articleTitle: string): string => {
@@ -244,8 +248,8 @@ export const article = async (
   }
 
   return {
-    id: articleDoc.id,
     ...article,
+    id: articleDoc.id,
     content: getArticleContent(article, contentBlocked),
     contentBlocked,
   };
@@ -273,14 +277,14 @@ const articleBySlug = async (
   const contentBlocked = await shouldBlockContent(article, context);
 
   return {
-    id: articleDoc.id,
     ...article,
+    id: articleDoc.id,
     content: getArticleContent(article, contentBlocked),
     contentBlocked,
   };
 }
 
-const articlesByUser = async (
+export const articlesByUser = async (
   _: null, 
   {
     userId,
@@ -589,10 +593,74 @@ const comments = async (
     .where('resourceId','==', parent.id)
     .where('parentId', '==', null)
     .where('deletedAt', '==', null)
-    .orderBy('createdAt', 'desc')
+    .orderBy('createdAt', 'asc')
     .get();
 
   return comments.docs.map(comment => ({ id: comment.id, ...comment.data() })) as Comment[];
+}
+
+const analytics = async (
+  parent: Article,
+  _: null,
+  context: Context,
+): Promise<ArticleAnalytics> => {
+  if (!context.userId) {
+    throw new AuthenticationError('Not authenticated');
+  }
+
+  if (context.userId !== parent.userId) {
+    throw new AuthenticationError('Not authorized');
+  }
+
+  const totalComments = await comments(parent, null, context);
+
+  if (!context.bigQuery) {
+    return {
+      totalViews: 0,
+      totalReads: 0,
+      totalComments: totalComments.length,
+      views: [],
+      reads: [],
+      wordCount: parent.wordCount,
+    };
+  }
+
+  const viewQuery = `
+    SELECT
+      article_id,
+        FORMAT_DATE("%Y-%m-%d", CAST(timestamp as date)) as date,
+      COUNT(article_id) as count
+    FROM \`bard-stage.webapp.article_article_viewed\`
+    WHERE \`bard-stage.webapp.article_article_viewed\`.article_id = '${parent.id}'
+    GROUP BY article_id, date
+  `;
+
+  const [viewJob] = await context.bigQuery.createQueryJob({ query: viewQuery });
+  const [viewResults] = await viewJob.getQueryResults();
+  const totalViews = viewResults.reduce((a, b) => a + b.count, 0);
+
+  const readQuery = `
+    SELECT 
+      article_id,
+        FORMAT_DATE("%Y-%m-%d", CAST(timestamp as date)) as date,
+      COUNT(article_id) as count
+    FROM \`bard-stage.webapp.article_article_read\`
+    WHERE \`bard-stage.webapp.article_article_read\`.article_id = '${parent.id}'
+    GROUP BY article_id, date
+  `;
+
+  const [readJob] = await context.bigQuery.createQueryJob({ query: readQuery });
+  const [readResults] = await readJob.getQueryResults();
+  const totalReads = readResults.reduce((a, b) => a + b.count, 0);
+
+  return {
+    totalViews,
+    totalReads,
+    totalComments: totalComments.length,
+    views: viewResults as AnalyticDetail[],
+    reads: readResults as AnalyticDetail[],
+    wordCount: parent.wordCount,
+  };
 }
 
 export default {
@@ -612,5 +680,6 @@ export default {
   Article: {
     author,
     comments,
+    analytics,
   },
 }

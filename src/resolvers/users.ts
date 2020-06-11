@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 import * as Sentry from '@sentry/node';
 
 import { getSubscriptionWithStripeData } from './subscriptions';
+import { articlesByUser } from './articles';
 import { sendEmail } from './email';
 
 import { Context } from '../types';
@@ -17,6 +18,7 @@ import {
   CreateUserPayload,
   UpdateUserInput,
   UpdateUserPayload,
+  UserAnalytics,
 } from '../generated/graphql';
 
 const createUsername = (name: string): string => {
@@ -331,6 +333,32 @@ const collections = async (
   return collectionsDocs;
 }
 
+const analytics = async (
+  parent: User,
+  _: null,
+  context: Context,
+): Promise<UserAnalytics> => {
+  if (!context.userId) {
+    throw new AuthenticationError('Not authenticated');
+  }
+
+  if (context.userId !== parent.id) {
+    throw new AuthenticationError('Not authorized');
+  }
+  
+  const articles = await articlesByUser(null, { userId: parent.id, drafts: false, limit: 0 }, context);
+  const wordsWritten = articles.reduce((wordsWritten, article) => wordsWritten + article.wordCount, 0);
+
+  const subs = await subscribers(parent, null, context);
+
+  return {
+    wordsWritten,
+    subscriberCount: subs.length || 0,
+    followerCount: parent.followerIds?.length || 0,
+    joinDate: parent.createdAt,
+  };
+}
+
 export default {
   Query: {
     user,
@@ -348,5 +376,6 @@ export default {
     profileSections,
     stripeDashboardUrl,
     collections,
+    analytics,
   }
 }
