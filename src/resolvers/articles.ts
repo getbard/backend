@@ -3,8 +3,6 @@ import { AuthenticationError, UserInputError } from 'apollo-server';
 import slugify from 'slugify';
 import cuid from 'cuid';
 import * as Sentry from '@sentry/node';
-import { BigQuery } from '@google-cloud/bigquery';
-import fs from 'fs';
 
 import { followStream, unfollowStream, addActivity, removeActivity } from './../lib/stream';
 import { getUserById, subscribers } from './users';
@@ -144,92 +142,52 @@ const articles = async (
   _: null, 
   args: {
     category: string;
-    headerCursor: string;
-    headlessCursor: string;
+    cursor: string;
   },
   context: Context
 ): Promise<ArticlesPayload> => {
-  let articlesWithHeader;
-  let articlesWithoutHeader;
+  let articles;
   const category = args?.category
     ? args.category.toLowerCase()
     : 'all';
 
   if (category === 'all') {
-    articlesWithHeader = await context.db
+    articles = await context.db
       .collection('articles')
       .where('publishedAt', '>', '')
       .where('deletedAt', '==', null)
-      .orderBy('publishedAt', 'desc')
-      .orderBy('headerImage.id')
-      .orderBy('updatedAt', 'desc');
-
-    articlesWithoutHeader = await context.db
-      .collection('articles')
-      .where('publishedAt', '>', '')
-      .where('deletedAt', '==', null)
-      .where('headerImage', '==', null)
       .orderBy('publishedAt', 'desc')
       .orderBy('updatedAt', 'desc');
   } else {
-    articlesWithHeader = await context.db
+    articles = await context.db
       .collection('articles')
       .where('category', '==', category)
       .where('publishedAt', '>', '')
       .where('deletedAt', '==', null)
       .orderBy('publishedAt', 'desc')
-      .orderBy('headerImage.id')
-      .orderBy('updatedAt', 'desc');
-
-    articlesWithoutHeader = await context.db
-      .collection('articles')
-      .where('category', '==', category)
-      .where('publishedAt', '>', '')
-      .where('deletedAt', '==', null)
-      .where('headerImage', '==', null)
-      .orderBy('publishedAt', 'desc')
       .orderBy('updatedAt', 'desc');
   }
 
-  if (args?.headerCursor && args?.headlessCursor) {
-    const lastHeaderArticle = await context.db.doc(`articles/${args.headerCursor}`).get();
-    const lastHeadlessArticle = await context.db.doc(`articles/${args.headlessCursor}`).get();
+  if (args?.cursor) {
+    const lastArticle = await context.db.doc(`articles/${args.cursor}`).get();
 
-    articlesWithoutHeader = await articlesWithoutHeader
-      .startAfter(lastHeadlessArticle)
-      .limit(12)
-      .get();
-
-    articlesWithHeader = await articlesWithHeader
-      .startAfter(lastHeaderArticle)
+    articles = await articles
+      .startAfter(lastArticle)
       .limit(12)
       .get();
   } else {
-    articlesWithoutHeader = await articlesWithoutHeader.limit(12).get();
-
-    articlesWithHeader = await articlesWithHeader
-      .limit(articlesWithoutHeader.docs.length <= 6 ? 14 : 12)
-      .get();
+    articles = await articles.limit(12).get();
   }
 
-  const articlesWithHeaderData = articlesWithHeader.docs.map(article => ({
-    id: article.id,
-    ...article.data(),
-  })) as Article[];
-
-  const articlesWithoutHeaderData = articlesWithoutHeader.docs.map(article => ({
+  const articlesData = articles.docs.map(article => ({
     id: article.id,
     ...article.data(),
   })) as Article[];
 
   return {
-    articlesWithHeader: articlesWithHeaderData,
-    articlesWithoutHeader: articlesWithoutHeaderData,
-    headerCursor: articlesWithHeaderData.length
-      ? articlesWithHeaderData[articlesWithHeaderData.length - 1].id
-      : null,
-    headlessCursor: articlesWithoutHeaderData.length
-      ? articlesWithoutHeaderData[articlesWithoutHeaderData.length - 1].id
+    articles: articlesData,
+    cursor: articlesData.length
+      ? articlesData[articlesData.length - 1].id
       : null,
   };
 };
