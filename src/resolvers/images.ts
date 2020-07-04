@@ -28,8 +28,8 @@ const uploadImage = async (
   const storeageClient = storage();
   const bucket = storeageClient.bucket(process.env.IMAGE_BUCKET_NAME);
 
-  // Replaces () in case someone uploads a file with (1)
-  const fileName = `${cuid()}-${input.name.replace(/ *\([^)]*\) */g, '')}`;
+  // Append time for super uniqueness
+  const fileName = `${cuid()}-${new Date().getTime()}`;
   const file = bucket.file(fileName);
 
   const base64EncodedImageString = input.content.replace(/^data:image\/\w+;base64,/, '');
