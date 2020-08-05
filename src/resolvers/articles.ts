@@ -538,9 +538,7 @@ const author = async (
   _: null,
   context: Context,
 ): Promise<User | null> => {
-  const author = await getUserById(parent.userId, context);
-  console.log(author, parent);
-  return author;
+  return await getUserById(parent.userId, context);;
 }
 
 const comments = async (
