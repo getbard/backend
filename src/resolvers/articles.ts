@@ -179,10 +179,10 @@ const articles = async (
     articles = await articles.limit(12).get();
   }
 
-  const articlesData = articles.docs.map(article => ({
+  const articlesData = articles.docs.filter(Boolean).map(article => ({
     id: article.id,
     ...article.data(),
-  })).filter(Boolean) as Article[];
+  })) as Article[];
 
   return {
     articles: articlesData,
