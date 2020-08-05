@@ -182,7 +182,7 @@ const articles = async (
   const articlesData = articles.docs.map(article => ({
     id: article.id,
     ...article.data(),
-  })) as Article[];
+  })).filter(Boolean) as Article[];
 
   return {
     articles: articlesData,
