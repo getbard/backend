@@ -184,14 +184,6 @@ const articles = async (
     ...article.data(),
   })) as Article[];
 
-  articlesData.forEach(article => {
-    if (!article) {
-      console.log('n ', article);
-    } else {
-      console.log('a ', article);
-    }
-  })
-
   return {
     articles: articlesData,
     cursor: articlesData.length
@@ -546,7 +538,9 @@ const author = async (
   _: null,
   context: Context,
 ): Promise<User | null> => {
-  return await getUserById(parent.userId, context);
+  const author = await getUserById(parent.userId, context);
+  console.log(author, parent);
+  return author;
 }
 
 const comments = async (
