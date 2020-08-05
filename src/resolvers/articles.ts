@@ -179,14 +179,18 @@ const articles = async (
     articles = await articles.limit(12).get();
   }
 
-  const articlesData = articles.docs.map(article => {
-    console.log('ARTY: ', article.id, article.data());
+  const articlesData = articles.docs.map(article => ({
+    id: article.id,
+    ...article.data(),
+  })) as Article[];
 
-    return {
-      id: article.id,
-      ...article.data(),
-    };
-  }).filter(Boolean) as Article[];
+  articlesData.forEach(article => {
+    if (!article) {
+      console.log('n ', article);
+    } else {
+      console.log('a ', article);
+    }
+  })
 
   return {
     articles: articlesData,
